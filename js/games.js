@@ -1,4 +1,4 @@
-/* 정리 게임 5종: 회차마다 하나씩. Games.start(host, lesson, onDone) */
+/* 정리 게임 6종: 회차마다 하나씩. Games.start(host, lesson, onDone) */
 var Games = (function () {
   function head(host, L, label) {
     host.innerHTML = '<div class="game g-' + L.game + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><div class="hud">' + label + '</div><div class="stage"></div></div>';
@@ -22,7 +22,7 @@ var Games = (function () {
   function later(f, ms) { var t = setTimeout(f, ms); Cleanup.add(function () { clearTimeout(t); }); return t; }
   function every(f, ms) { var t = setInterval(f, ms); Cleanup.add(function () { clearInterval(t); }); return t; }
 
-  /* Day 1 짝꿍 카드: 그림 ↔ 낱말 */
+  /* 짝꿍 카드: 그림 ↔ 낱말 */
   function memory(host, L, onDone) {
     var pick = shuffle(L.words).slice(0, 8), cards = [], open = [], moves = 0, found = 0, lock = false;
     pick.forEach(function (w, i) { cards.push({ k: i, face: ART.pic(w.pic), w: w }); cards.push({ k: i, face: '<span class="mem-word">' + esc(w.en) + '</span>', w: w }); });
@@ -52,7 +52,7 @@ var Games = (function () {
     });
   }
 
-  /* Day 2 동물 두더지 잡기: 들려준 동물만 잡기 */
+  /* 두더지 잡기: 들려준 낱말의 그림만 잡기 */
   function mole(host, L, onDone) {
     var T = 50, left = T, hits = 0, pts = 0, miss = 0, target = null, holes = [], over = false;
     var g = head(host, L, '<button class="btn small" id="again2">🔊 다시 듣기</button><span class="tgt" id="tgt"></span><span>⏱ <b id="time">' + T + '</b></span><span>잡은 수 <b id="hits">0</b></span>');
@@ -86,12 +86,12 @@ var Games = (function () {
       left--; $('#time').textContent = left;
       if (left <= 0) {
         over = true; clearInterval(tick);
-        result(host, L, { score: pts, stars: hits >= 12 ? 3 : hits >= 8 ? 2 : 1, total: hits, note: '동물 ' + hits + '마리를 잡았어요. 틀린 두더지 ' + miss + '번.' }, onDone, function () { Cleanup.run(); mole(host, L, onDone); });
+        result(host, L, { score: pts, stars: hits >= 12 ? 3 : hits >= 8 ? 2 : 1, total: hits, note: '두더지 ' + hits + '마리를 잡았어요. 틀린 두더지 ' + miss + '번.' }, onDone, function () { Cleanup.run(); mole(host, L, onDone); });
       }
     }, 1000);
   }
 
-  /* Day 3 날씨 풍선 팡팡: 그림에 맞는 낱말 풍선 */
+  /* 풍선 팡팡: 그림에 맞는 낱말 풍선 */
   function balloon(host, L, onDone) {
     var rounds = shuffle(L.words).slice(0, 10), r = 0, good = 0, first = true, busy = false;
     var g = head(host, L, '<span>문제 <b id="rn">1</b>/10</span><span>맞힌 수 <b id="ok">0</b></span>');
@@ -115,21 +115,16 @@ var Games = (function () {
     next();
   }
 
-  /* Day 4 취미 문장 퍼즐: 낱말 조각을 차례대로 */
-  function stem(ko) { return ko.replace(/다$/, ''); }
-  function ieul(s) { var c = s.charCodeAt(s.length - 1) - 0xAC00; return c >= 0 && c % 28 === 0 ? s.slice(0, -1) + String.fromCharCode(s.charCodeAt(s.length - 1) + 8) : s + '을'; }
+  /* 문장 퍼즐: 그 회차의 문장과 바꿔 말하기 문장을 낱말 조각으로 */
   function puzzle(host, L, onDone) {
-    var verbs = shuffle(L.words), qs = [];
-    var pats = [
-      function (w) { return { en: 'I like to ' + w.en + '.', ko: '나는 ' + stem(w.ko) + '는 걸 좋아해.' }; },
-      function (w) { return { en: 'Can you ' + w.en + '?', ko: '너는 ' + ieul(stem(w.ko)) + ' 수 있니?' }; },
-      function (w) { return { en: 'I can ' + w.en + '.', ko: '나는 ' + ieul(stem(w.ko)) + ' 수 있어.' }; }
-    ];
-    for (var i = 0; i < 8; i++) { var w = verbs[i % verbs.length], q = pats[i % 3](w); q.pic = w.pic; qs.push(q); }
+    // 회차 문장을 먼저 모두 넣고, 남은 자리는 바꿔 말하기 문장으로 (같은 문장은 한 번만)
+    var seen = {}, pick = function (list) { return list.filter(function (q) { if (seen[q.en] || q.en.split(' ').length < 3) return false; seen[q.en] = 1; return true; }); };
+    var main = pick(L.sentences.map(function (x) { return { en: x.en, ko: x.ko, pic: x.pic }; }));
+    var qs = shuffle(main.concat(pick(shuffle(drillItems(L))).slice(0, 8 - main.length)));
     var r = 0, good = 0;
-    var g = head(host, L, '<span>문제 <b id="rn">1</b>/8</span><span>한 번에 맞힘 <b id="ok">0</b></span>');
+    var g = head(host, L, '<span>문제 <b id="rn">1</b>/' + qs.length + '</span><span>한 번에 맞힘 <b id="ok">0</b></span>');
     function next() {
-      if (r >= qs.length) return result(host, L, { score: Math.round(good / 8 * 100), stars: good >= 7 ? 3 : good >= 5 ? 2 : 1, total: 8, note: '8문장 중 ' + good + '문장을 한 번에 완성했어요.' }, onDone, function () { puzzle(host, L, onDone); });
+      if (r >= qs.length) return result(host, L, { score: Math.round(good / qs.length * 100), stars: good >= qs.length - 1 ? 3 : good >= qs.length * .6 ? 2 : 1, total: qs.length, note: qs.length + '문장 중 ' + good + '문장을 한 번에 완성했어요.' }, onDone, function () { puzzle(host, L, onDone); });
       var q = qs[r], mark = q.en.slice(-1), parts = q.en.slice(0, -1).split(' '), placed = [], first = true;
       $('#rn').textContent = r + 1;
       var tiles = shuffle(parts.map(function (t, i) { return { t: t, i: i }; }));
@@ -155,7 +150,35 @@ var Games = (function () {
     next();
   }
 
-  /* Day 5 누구일까요: 설명을 듣고 친구 찾기 */
+  /* 철자 퍼즐: 그림을 보고 알파벳을 차례대로 */
+  function spell(host, L, onDone) {
+    var ws = shuffle(L.words.filter(function (w) { return /^[a-z-]+$/i.test(w.en); })).slice(0, 8), r = 0, good = 0;
+    var g = head(host, L, '<span>문제 <b id="rn">1</b>/' + ws.length + '</span><span>한 번에 맞힘 <b id="ok">0</b></span>');
+    function next() {
+      if (r >= ws.length) return result(host, L, { score: Math.round(good / ws.length * 100), stars: good >= ws.length - 1 ? 3 : good >= ws.length * .6 ? 2 : 1, total: ws.length, note: ws.length + '낱말 중 ' + good + '낱말을 한 번에 맞혔어요.' }, onDone, function () { spell(host, L, onDone); });
+      var w = ws[r], letters = w.en.toLowerCase().split(''), pos = 0, first = true;
+      $('#rn').textContent = r + 1;
+      var tiles = shuffle(letters.map(function (c, i) { return { c: c, i: i }; }));
+      g.stage.innerHTML = '<div class="pz"><div class="pz-q">' + ART.pic(w.pic) + '<p>' + esc(w.ko) + '</p></div>' +
+        '<div class="sp-ans" aria-live="polite">' + letters.map(function () { return '<span class="sp-slot"></span>'; }).join('') + '</div>' +
+        '<div class="pz-tiles">' + tiles.map(function (t, k) { return '<button class="tile sp" data-k="' + k + '">' + esc(t.c) + '</button>'; }).join('') + '</div>' +
+        '<div class="row center"><button class="btn small" id="hint">🔊 들어 보기</button></div></div>';
+      var slots = $$('.sp-slot', g.stage);
+      $$('.tile.sp', g.stage).forEach(function (b) {
+        b.onclick = function () {
+          var t = tiles[+b.dataset.k];
+          if (t.c === letters[pos]) {
+            Sound.tap(); slots[pos].textContent = t.c; slots[pos].classList.add('on'); b.disabled = true; pos++;
+            if (pos === letters.length) { if (first) good++; $('#ok').textContent = good; Sound.good(); $('.sp-ans', g.stage).classList.add('right'); Voice.say(w.en); r++; later(next, 1400); }
+          } else { first = false; Sound.bad(); b.classList.add('shake'); later(function () { b.classList.remove('shake'); }, 400); }
+        };
+      });
+      $('#hint').onclick = function () { first = false; Voice.say(w.en); };
+    }
+    next();
+  }
+
+  /* 누구일까요 (생김새): 설명을 듣고 친구 찾기 */
   var NAMES = { she: ['Amy', 'Mina', 'Lily', 'Sora', 'Jenny', 'Emma'], he: ['Tom', 'Jun', 'Ben', 'Max', 'Sam', 'Leo'] };
   var SHIRTS = ['#E74C3C', '#0295A9', '#3FA34D', '#F28C28', '#036370', '#FFBB12'];
   function makePeople() {
@@ -209,6 +232,6 @@ var Games = (function () {
     next();
   }
 
-  var IMPL = { memory: memory, mole: mole, balloon: balloon, puzzle: puzzle, guess: guess };
+  var IMPL = { memory: memory, mole: mole, balloon: balloon, puzzle: puzzle, spell: spell, guess: guess };
   return { start: function (host, L, onDone) { intro(host, L, function () { IMPL[L.game](host, L, onDone || function () { }); }); } };
 })();

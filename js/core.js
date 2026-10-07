@@ -50,7 +50,7 @@ var Progress = {
   all: function (name) { return store.get(this.key(name), {}); },
   lesson: function (name, id) {
     var a = this.all(name), l = a[id] || {};
-    l.w = l.w || { s: [], t: [] }; l.s = l.s || { s: [], t: [] }; l.g = l.g || { best: 0, stars: 0, plays: 0 };
+    l.w = l.w || { s: [], t: [] }; l.s = l.s || { s: [], t: [] }; l.d = l.d || { s: [], t: [] }; l.g = l.g || { best: 0, stars: 0, plays: 0 };
     return l;
   },
   save: function (name, id, l) { var a = this.all(name); a[id] = l; store.set(this.key(name), a); },
@@ -59,9 +59,9 @@ var Progress = {
     var a = this.all(name);
     rows.forEach(function (r) {
       var id = +r.lesson; if (!id) return;
-      var l = a[id] || {}; l.w = l.w || { s: [], t: [] }; l.s = l.s || { s: [], t: [] }; l.g = l.g || { best: 0, stars: 0, plays: 0 };
+      var l = a[id] || {}; l.w = l.w || { s: [], t: [] }; l.s = l.s || { s: [], t: [] }; l.d = l.d || { s: [], t: [] }; l.g = l.g || { best: 0, stars: 0, plays: 0 };
       var d = {}; try { d = JSON.parse(r.items || '{}'); } catch (e) { }
-      var part = r.part === 'words' ? l.w : r.part === 'sentences' ? l.s : null;
+      var part = r.part === 'words' ? l.w : r.part === 'sentences' ? l.s : r.part === 'drill' ? l.d : null;
       if (part) ['s', 't'].forEach(function (k) { (d[k] || []).forEach(function (i) { if (part[k].indexOf(i) < 0) part[k].push(i); }); });
       if (r.part === 'game') { l.g.best = Math.max(l.g.best, +r.score || 0); l.g.stars = Math.max(l.g.stars, +r.stars || 0); l.g.plays = Math.max(l.g.plays, 1); }
       a[id] = l;

@@ -12,7 +12,7 @@ var Teacher = (function () {
       '<div class="days">' + LESSONS.map(function (L) {
         return '<a class="day" href="#t/' + L.id + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><span class="day-ill"><b>Day ' + L.id + '</b><span class="day-emo">' + L.icon + '</span></span>' +
           '<span class="day-body"><span class="day-t">' + L.theme + ' <small>' + L.ko + '</small></span><span class="day-sub">' + L.words.slice(0, 5).map(function (w) { return esc(w.en); }).join(' · ') + ' …</span>' +
-          '<span class="day-steps"><span class="pill">낱말 10</span><span class="pill">문장 4</span><span class="pill">' + GAMES[L.game].icon + ' ' + GAMES[L.game].name + '</span></span></span></a>';
+          '<span class="day-steps"><span class="pill">낱말 10</span><span class="pill">문장 4</span><span class="pill">바꿔 말하기</span><span class="pill">' + GAMES[L.game].icon + ' ' + GAMES[L.game].name + '</span></span></span></a>';
       }).join('') + '</div>';
   }
 
@@ -22,7 +22,7 @@ var Teacher = (function () {
     L.words.forEach(function (w, i) { s.push({ k: 'word', i: i }); });
     s.push({ k: 'quiz' }, { k: 'sec', t: 'Sentences', ko: '문장 익히기', emo: '💬' });
     L.sentences.forEach(function (x, i) { s.push({ k: 'sent', i: i }); });
-    s.push({ k: 'talk' }, { k: 'game' }, { k: 'wrap' });
+    s.push({ k: 'talk' }, { k: 'sec', t: 'Change & Say', ko: '바꿔 말하기', emo: '🔁' }, { k: 'drill' }, { k: 'game' }, { k: 'wrap' });
     return s;
   }
   function deck(view, L) {
@@ -53,7 +53,7 @@ var Teacher = (function () {
       slide.className = 'slide k-' + s.k;
       var h = '';
       if (s.k === 'cover') h = '<div class="s-cover"><span class="s-emo">' + L.icon + '</span><p class="s-eye">Day ' + L.id + '</p><h2>' + L.theme + '</h2><p class="s-sub">' + L.ko + ' · ' + esc(L.goal) + '</p>' +
-        '<ol class="s-plan"><li><b>1</b> 낱말 10개</li><li><b>2</b> 문장 4개</li><li><b>3</b> ' + GAMES[L.game].name + '</li></ol></div>';
+        '<ol class="s-plan"><li><b>1</b> 낱말 10개</li><li><b>2</b> 문장 4개</li><li><b>3</b> 바꿔 말하기</li><li><b>4</b> ' + GAMES[L.game].name + '</li></ol></div>';
       if (s.k === 'sec') h = '<div class="s-sec"><span class="s-emo">' + s.emo + '</span><h2>' + s.t + '</h2><p class="s-sub">' + s.ko + '</p></div>';
       if (s.k === 'word') {
         var w = L.words[s.i];
@@ -71,16 +71,24 @@ var Teacher = (function () {
       }
       if (s.k === 'talk') h = '<div class="s-talk"><h2>Let’s talk!</h2><p class="s-sub">짝과 A, B 역할을 나눠 말해요 · 말풍선을 누르면 들려줘요</p><div class="talk">' + L.sentences.map(function (x, i) {
         return '<button class="bub ' + x.who + '" data-i="' + i + '"><span class="who-av">' + (x.who === 'A' ? '🧒' : '👧') + '<b>' + x.who + '</b></span><span class="bub-t">' + esc(x.en) + ko(x.ko) + '</span></button>'; }).join('') + '</div></div>';
+      if (s.k === 'drill') {
+        var dp = L.drill.en.split('{w}');
+        h = '<div class="s-drill"><h2>Change &amp; Say</h2><p class="s-sub">그림을 누르면 빈칸에 낱말이 들어가고 문장을 읽어 줘요</p>' +
+          '<p class="s-en sent dr-sent">' + esc(dp[0]) + '<span class="slot" id="dSlot">＿＿</span>' + esc(dp[1] || '') + '</p>' + ko(L.drill.ko.replace(/\{k(?::[^}]+)?\}/g, '＿＿')).replace('class="s-ko', 'id="dKo" class="s-ko') +
+          '<div class="dr-grid">' + drillItems(L).map(function (it, i) { return '<button class="dr-card" data-i="' + i + '">' + ART.pic(it.pic) + '<span>' + esc(it.slot) + '</span></button>'; }).join('') + '</div></div>';
+      }
       if (s.k === 'game') { var G = GAMES[L.game]; h = '<div class="s-cover"><span class="s-emo">' + G.icon + '</span><p class="s-eye">정리 게임</p><h2>' + G.name + '</h2><p class="s-sub">' + G.how + '</p>' +
-        '<div class="row center"><button class="btn primary big" id="demo">칠판에서 함께 해 보기</button></div><p class="s-note">학생들은 각자 기기에서 <b>Day ' + L.id + ' → ③ ' + G.name + '</b> 을 해요.</p></div>'; }
+        '<div class="row center"><button class="btn primary big" id="demo">칠판에서 함께 해 보기</button></div><p class="s-note">학생들은 각자 기기에서 <b>Day ' + L.id + ' → ④ ' + G.name + '</b> 을 해요.</p></div>'; }
       if (s.k === 'wrap') h = '<div class="s-wrap"><h2>Today I learned</h2><div class="chips">' + L.words.map(function (w) { return '<button class="chip big" data-say="' + esc(w.en) + '">' + esc(w.en) + '</button>'; }).join('') + '</div>' +
-        '<ul class="wrap-s">' + L.sentences.map(function (x) { return '<li><button class="linkish" data-say="' + esc(x.en) + '">🔊 ' + esc(x.en) + '</button></li>'; }).join('') + '</ul><p class="s-big">Good job! 👏</p></div>';
+        '<ul class="wrap-s">' + L.sentences.map(function (x) { return '<li><button class="linkish" data-say="' + esc(x.en) + '">🔊 ' + esc(x.en) + '</button></li>'; }).join('') + '<li><button class="linkish" data-say="' + esc(drillItems(L)[0].en) + '">🔁 ' + esc(L.drill.en.replace('{w}', '___')) + '</button></li></ul><p class="s-big">Good job! 👏</p></div>';
       if (/cover|sec|game|wrap/.test(s.k)) h = ART.pattern(1600, 900, 3 + idx, { step: 120, scale: 1.6, skip: function (x, y) { return x > 260 && x < 1340 && y > 140 && y < 760; } }) + h;
       slide.innerHTML = h + '<span class="pg" aria-hidden="true">' + (idx + 1) + '</span>';
       bind(s);
     }
+    var drillCur = null;
     function say() {
       var s = S[idx];
+      if (s.k === 'drill' && drillCur) return Voice.say(drillCur.en);
       if (s.k !== 'word' && s.k !== 'sent') return;
       var t = s.k === 'word' ? L.words[s.i].en : L.sentences[s.i].en, key = s.k[0] + s.i;
       speakEl(t, s.k === 'sent' ? $$('#sEn span', slide) : null);
@@ -102,6 +110,15 @@ var Teacher = (function () {
         })();
       };
       $$('.q-card', slide).forEach(function (c) { c.onclick = function () { c.classList.add('open'); Voice.say(L.words[+c.dataset.i].en); }; });
+      drillCur = null;
+      $$('.dr-card', slide).forEach(function (c) {
+        c.onclick = function () {
+          var it = drillItems(L)[+c.dataset.i]; drillCur = it;
+          $$('.dr-card', slide).forEach(function (x) { x.classList.toggle('on', x === c); });
+          var sl = $('#dSlot', slide); sl.textContent = it.slot; sl.classList.add('on');
+          $('#dKo', slide).textContent = it.ko; Voice.say(it.en);
+        };
+      });
       $$('.bub', slide).forEach(function (c) { c.onclick = function () { Voice.say(L.sentences[+c.dataset.i].en); }; });
       $$('[data-say]', slide).forEach(function (c) { c.onclick = function () { Voice.say(c.dataset.say); }; });
       var d = $('#demo', slide);
@@ -135,19 +152,20 @@ var Teacher = (function () {
   }
 
   /* ---------- 학습 결과: 표와 그래프 ---------- */
-  var MAXW = 20, MAXS = 8; // 낱말 10개 × (말하기+쓰기), 문장 4개 × (말하기+쓰기)
   function aggregate(rows) {
     var by = {};
     rows.forEach(function (r) {
       var n = String(r.name || '').trim(), id = +r.lesson; if (!n || !id) return;
       var s = by[n] = by[n] || { name: n, d: {}, last: '' };
-      var d = s.d[id] = s.d[id] || { ws: 0, wt: 0, ss: 0, st: 0, game: null, plays: 0, gstars: 0 };
+      var d = s.d[id] = s.d[id] || { ws: 0, wt: 0, ss: 0, st: 0, ds: 0, dt: 0, game: null, plays: 0, gstars: 0 };
       if (r.part === 'words') { d.ws = Math.max(d.ws, +r.said || 0); d.wt = Math.max(d.wt, +r.wrote || 0); }
       if (r.part === 'sentences') { d.ss = Math.max(d.ss, +r.said || 0); d.st = Math.max(d.st, +r.wrote || 0); }
+      if (r.part === 'drill') { d.ds = Math.max(d.ds, +r.said || 0); d.dt = Math.max(d.dt, +r.wrote || 0); }
       if (r.part === 'game') { d.game = Math.max(d.game || 0, +r.score || 0); d.plays++; d.gstars = Math.max(d.gstars, +r.stars || 0); }
       var t = String(r.time || ''); if (t > s.last) s.last = t;
     });
-    Object.keys(by).forEach(function (n) { Object.keys(by[n].d).forEach(function (id) { var d = by[n].d[id]; d.pct = Math.round(((d.ws + d.wt + d.ss + d.st) / (MAXW + MAXS)) * 80 + (d.plays ? 20 : 0)); }); });
+    Object.keys(by).forEach(function (n) { Object.keys(by[n].d).forEach(function (id) { var d = by[n].d[id], L = lessonById(id), cells = L ? 2 * (L.words.length + L.sentences.length + drillItems(L).length) : 40; d.dn = L ? drillItems(L).length : 6;
+      d.pct = Math.min(100, Math.round(((d.ws + d.wt + d.ss + d.st + d.ds + d.dt) / cells) * 80 + (d.plays ? 20 : 0))); }); });
     return Object.keys(by).sort(function (a, b) { return a.localeCompare(b, 'ko'); }).map(function (n) { return by[n]; });
   }
   var RAMP = ['#E6F6F9', '#B4E6EE', '#62C6D6', '#0295A9', '#036370'];
@@ -155,7 +173,7 @@ var Teacher = (function () {
 
   function barChart(title, sub, data, max, unit) {
     // data: [{label, value|null, note}]
-    var W = 520, H = 230, L0 = 40, B = 190, top = 24, bw = 46, gap = (W - L0 - 12 - bw * data.length) / (data.length);
+    var W = data.length > 10 ? 1040 : 520, H = 230, L0 = 40, B = 190, top = 24, bw = Math.min(46, (W - L0 - 12) / data.length * .62), gap = (W - L0 - 12 - bw * data.length) / (data.length);
     var y = function (v) { return B - (v / max) * (B - top); };
     var grid = [0, .25, .5, .75, 1].map(function (f) { var v = Math.round(max * f), yy = y(v); return '<line x1="' + L0 + '" x2="' + (W - 8) + '" y1="' + yy + '" y2="' + yy + '" class="grid"/><text x="' + (L0 - 8) + '" y="' + (yy + 4) + '" class="ax" text-anchor="end">' + v + '</text>'; }).join('');
     var bars = data.map(function (d, i) {
@@ -164,7 +182,7 @@ var Teacher = (function () {
       return '<g class="bar-g" tabindex="0" data-tip="' + esc(d.label + ' · ' + (has ? v + unit : '기록 없음') + (d.note ? ' · ' + d.note : '')) + '">' +
         '<rect x="' + (x - gap / 2 + 2) + '" y="' + top + '" width="' + (bw + gap - 4) + '" height="' + (B - top + 24) + '" fill="transparent"/>' +
         (path ? '<path d="' + path + '" class="bar-fill"/>' : '') +
-        '<text x="' + (x + bw / 2) + '" y="' + (has ? yy - 7 : B - 7) + '" class="val" text-anchor="middle">' + (has ? v + unit : '–') + '</text>' +
+        '<text x="' + (x + bw / 2) + '" y="' + (has ? yy - 7 : B - 7) + '" class="val" text-anchor="middle">' + (has ? v + (data.length > 10 ? '' : unit) : '–') + '</text>' +
         '<text x="' + (x + bw / 2) + '" y="' + (B + 18) + '" class="ax" text-anchor="middle">' + esc(d.label) + '</text></g>';
     }).join('');
     return '<figure class="chart"><figcaption><b>' + title + '</b><span class="muted">' + sub + '</span></figcaption>' +
@@ -194,28 +212,28 @@ var Teacher = (function () {
         '<div class="stat"><i class="stat-ico" aria-hidden="true">📈</i><b>' + avg + '<small>%</small></b><span>전체 평균 진도율</span></div>' +
         '<div class="stat"><i class="stat-ico" aria-hidden="true">🏅</i><b>' + done + '<small>개</small></b><span>마친 회차 (100%)</span></div>' +
         '<div class="stat"><i class="stat-ico" aria-hidden="true">🎮</i><b>' + plays + '<small>번</small></b><span>게임 한 횟수</span></div></div>' +
-        '<div class="charts">' +
-        barChart('회차별 평균 진도율', '기록이 있는 학생 기준 · 낱말·문장 80% + 게임 20%', per.map(function (p) { return { label: 'Day ' + p.L.id, value: p.pct, note: p.L.ko + ' · ' + p.n + '명' }; }), 100, '%') +
-        barChart('회차별 게임 평균 점수', '가장 높은 점수의 평균 · 100점 만점', per.map(function (p) { return { label: 'Day ' + p.L.id, value: p.game, note: GAMES[p.L.game].name + ' · ' + p.gn + '명' }; }), 100, '점') +
+        '<div class="charts' + (LESSONS.length > 10 ? ' wide' : '') + '">' +
+        barChart('회차별 평균 진도율 (%)', '기록이 있는 학생 기준 · 낱말·문장·바꿔 말하기 80% + 게임 20%', per.map(function (p) { return { label: (LESSONS.length > 10 ? '' : 'Day ') + p.L.id, value: p.pct, note: p.L.ko + ' · ' + p.n + '명' }; }), 100, '%') +
+        barChart('회차별 게임 평균 점수 (점)', '가장 높은 점수의 평균 · 100점 만점', per.map(function (p) { return { label: (LESSONS.length > 10 ? '' : 'Day ') + p.L.id, value: p.game, note: GAMES[p.L.game].name + ' · ' + p.gn + '명' }; }), 100, '점') +
         '</div>' +
         '<section class="card"><div class="sec-h"><h2>학생별 진도율</h2><div class="legend" aria-label="색 범례">' + ['0–19', '20–44', '45–69', '70–89', '90–100'].map(function (t, i) { return '<span><i style="background:' + RAMP[i] + '"></i>' + t + '%</span>'; }).join('') + '<span><i class="none"></i>기록 없음</span></div></div>' +
-        '<div class="tbl-wrap"><table class="heat"><thead><tr><th scope="col">이름</th>' + LESSONS.map(function (L) { return '<th scope="col">Day ' + L.id + '<small>' + L.ko + '</small></th>'; }).join('') + '<th scope="col">평균<small>5회차 전체</small></th></tr></thead><tbody>' +
+        '<div class="tbl-wrap"><table class="heat"><thead><tr><th scope="col">이름</th>' + LESSONS.map(function (L) { return '<th scope="col">' + L.id + '<small>' + L.ko + '</small></th>'; }).join('') + '<th scope="col">평균<small>전체 회차</small></th></tr></thead><tbody>' +
         studs.map(function (s) {
           var tot = LESSONS.reduce(function (a, L) { return a + (s.d[L.id] ? s.d[L.id].pct : 0); }, 0) / LESSONS.length;
           return '<tr><th scope="row">' + esc(s.name) + '</th>' + LESSONS.map(function (L) {
             var d = s.d[L.id]; if (!d) return '<td class="cell none" data-tip="' + esc(s.name + ' · Day ' + L.id + ' · 기록 없음') + '">–</td>';
-            return '<td class="cell' + (d.pct >= 70 ? ' dk' : '') + '" style="background:' + rampOf(d.pct) + '" tabindex="0" data-tip="' + esc(s.name + ' · Day ' + L.id + ' · 낱말 말하기 ' + d.ws + '/10, 쓰기 ' + d.wt + '/10 · 문장 말하기 ' + d.ss + '/4, 쓰기 ' + d.st + '/4 · 게임 ' + (d.game == null ? '안 함' : d.game + '점')) + '">' + d.pct + '%</td>';
+            return '<td class="cell' + (d.pct >= 70 ? ' dk' : '') + '" style="background:' + rampOf(d.pct) + '" tabindex="0" data-tip="' + esc(s.name + ' · Day ' + L.id + ' · 낱말 말하기 ' + d.ws + '/10, 쓰기 ' + d.wt + '/10 · 문장 말하기 ' + d.ss + '/4, 쓰기 ' + d.st + '/4 · 바꿔 고르기 ' + d.dt + '/' + d.dn + ', 말하기 ' + d.ds + '/' + d.dn + ' · 게임 ' + (d.game == null ? '안 함' : d.game + '점')) + '">' + d.pct + '%</td>';
           }).join('') + '<td class="avg">' + Math.round(tot) + '%</td></tr>';
         }).join('') + '</tbody></table></div></section>' +
         '<section class="card"><div class="sec-h"><h2>자세한 기록</h2><label class="sel">회차 <select id="dayPick">' + LESSONS.map(function (L) { return '<option value="' + L.id + '">Day ' + L.id + ' ' + L.ko + '</option>'; }).join('') + '</select></label></div><div class="tbl-wrap" id="detail"></div></section>' +
         '<div class="tip" id="tip" role="tooltip" hidden></div>';
       function detail(id) {
-        $('#detail').innerHTML = '<table class="tbl"><thead><tr><th scope="col">이름</th><th scope="col">낱말 말하기</th><th scope="col">낱말 쓰기</th><th scope="col">문장 말하기</th><th scope="col">문장 쓰기</th><th scope="col">게임 최고 점수</th><th scope="col">게임 횟수</th><th scope="col">진도율</th></tr></thead><tbody>' +
+        $('#detail').innerHTML = '<table class="tbl"><thead><tr><th scope="col">이름</th><th scope="col">낱말 말하기</th><th scope="col">낱말 쓰기</th><th scope="col">문장 말하기</th><th scope="col">문장 쓰기</th><th scope="col">바꿔 고르기</th><th scope="col">바꿔 말하기</th><th scope="col">게임 최고 점수</th><th scope="col">게임 횟수</th><th scope="col">진도율</th></tr></thead><tbody>' +
           studs.map(function (s) {
             var d = s.d[id];
-            if (!d) return '<tr class="dim"><th scope="row">' + esc(s.name) + '</th><td colspan="7">기록 없음</td></tr>';
+            if (!d) return '<tr class="dim"><th scope="row">' + esc(s.name) + '</th><td colspan="9">기록 없음</td></tr>';
             function m(v, t) { return '<td><span class="mini"><i style="width:' + (v / t * 100) + '%"></i></span>' + v + '/' + t + '</td>'; }
-            return '<tr><th scope="row">' + esc(s.name) + '</th>' + m(d.ws, 10) + m(d.wt, 10) + m(d.ss, 4) + m(d.st, 4) + '<td>' + (d.game == null ? '–' : d.game + '점 ' + stars(d.gstars)) + '</td><td>' + d.plays + '</td><td><b>' + d.pct + '%</b></td></tr>';
+            return '<tr><th scope="row">' + esc(s.name) + '</th>' + m(d.ws, 10) + m(d.wt, 10) + m(d.ss, 4) + m(d.st, 4) + m(d.dt, d.dn) + m(d.ds, d.dn) + '<td>' + (d.game == null ? '–' : d.game + '점 ' + stars(d.gstars)) + '</td><td>' + d.plays + '</td><td><b>' + d.pct + '%</b></td></tr>';
           }).join('') + '</tbody></table>';
       }
       var dp = $('#dayPick'); dp.value = store.get('fe-recday', 1); dp.onchange = function () { store.set('fe-recday', +dp.value); detail(+dp.value); }; detail(+dp.value);
@@ -236,7 +254,7 @@ var Teacher = (function () {
     if (hasSheet) { $('#keyForm').onsubmit = function (e) { e.preventDefault(); load(); }; if (key) load(); else local(); } else local();
     $('#csv').onclick = function () {
       var head = ['시각', '이름', '회차', '테마', '활동', '말하기', '쓰기', '전체', '점수', '별'];
-      var lines = [head.join(',')].concat(rows.map(function (r) { return [r.time, r.name, r.lesson, r.theme, { words: '낱말', sentences: '문장', game: '게임' }[r.part] || r.part, r.said, r.wrote, r.total, r.score, r.stars].map(function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }));
+      var lines = [head.join(',')].concat(rows.map(function (r) { return [r.time, r.name, r.lesson, r.theme, { words: '낱말', sentences: '문장', drill: '바꿔 말하기', game: '게임' }[r.part] || r.part, r.said, r.wrote, r.total, r.score, r.stars].map(function (v) { v = String(v == null ? '' : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }));
       var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv' })); a.download = '영어첫걸음_기록.csv'; a.click();
     };
   }

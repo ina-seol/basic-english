@@ -643,3 +643,39 @@ body { background: var(--bg); }
 .legend i.none { background: repeating-linear-gradient(45deg, #fff 0 3px, #E8DCCB 3px 5px); }
 .topbar .btn.dark { --fill: var(--teal-dk); border-color: var(--teal-dk); color: #fff; box-shadow: none; }
 .hello > .bits, .lesson-head > .bits, .hero > .deco { position: absolute; }
+
+/* ---------- 바꿔 말하기 ---------- */
+.frame-tag { font-size: 13px; font-weight: 700; color: var(--teal); margin-top: 4px; }
+.frame-pat { font-family: var(--en); font-weight: 700; font-size: clamp(20px, 2vw, 28px); padding: 6px 16px; background: var(--paper); border: 2px dashed #D8C7B0; border-radius: 14px; }
+.blank { display: inline-block; min-width: 2.6em; border-bottom: 3px solid var(--c); margin: 0 .25em; }
+.drill-sent { font-family: var(--en); font-weight: 700; font-size: clamp(28px, 3.2vw, 46px); line-height: 1.2; }
+.slot { display: inline-block; min-width: 2.4em; margin: 0 .2em; padding: 0 .3em; text-align: center; color: var(--ink-soft); background: #F3E7D7; border: 2px dashed #CDB79C; border-radius: 12px; transition: background-color .2s, color .2s; }
+.slot.on { color: var(--on, #fff); background: var(--c); border: 2px solid var(--c); animation: pop .35s cubic-bezier(.2,.9,.3,1.5); }
+@keyframes pop { 0% { transform: scale(.7); } 100% { transform: scale(1); } }
+.tile.opt { font-size: 22px; min-height: 52px; }
+.tile.opt.on { background: var(--c); color: var(--on, #fff); opacity: 1; }
+.tile.opt:disabled:not(.on) { opacity: .3; }
+.practice.drill .ko { font-size: 18px; color: var(--ink-soft); }
+
+/* 철자 퍼즐 */
+.sp-ans { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 10px 14px; border-radius: 16px; }
+.sp-ans.right { background: #E3F6E0; }
+.sp-slot { width: 52px; height: 62px; display: grid; place-items: center; font-family: var(--en); font-weight: 700; font-size: 34px; border-bottom: 4px solid #D8C7B0; }
+.sp-slot.on { border-color: var(--c); color: var(--ink); animation: pop .25s; }
+.tile.sp { min-width: 58px; font-size: 30px; text-transform: lowercase; }
+@media (max-width: 640px) { .sp-slot { width: 36px; height: 48px; font-size: 26px; } .tile.sp { min-width: 46px; font-size: 24px; } }
+
+/* 교사 슬라이드: Change & Say */
+.s-drill { display: grid; gap: 1.4cqw; justify-items: center; text-align: center; align-content: center; height: 100%; }
+.s-drill h2 { font-family: var(--en); font-size: 4.6cqw; }
+.dr-sent { font-size: 5.4cqw; }
+.dr-sent .slot { border-radius: 1.4cqw; border-width: .3cqw; }
+.dr-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 1.2cqw; width: 100%; }
+.dr-card { display: grid; justify-items: center; gap: .4cqw; padding: 1cqw .6cqw; font-size: 6cqw; background: var(--cl); border: .3cqw solid transparent; border-radius: 2.4cqw; }
+.dr-card .pic-svg { width: 7cqw; height: 7cqw; }
+.dr-card span:last-child { font-family: var(--en); font-weight: 700; font-size: 1.9cqw; }
+.dr-card.on { border-color: var(--c); background: #fff; }
+.charts.wide { grid-template-columns: minmax(0, 1fr); }
+.heat td.cell { min-width: 48px; padding: 8px 4px; font-size: 13px; }
+.heat thead th { padding: 6px 4px; }
+@media (min-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .step { border-radius: 28px; } }

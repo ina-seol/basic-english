@@ -7,25 +7,41 @@
 
  하루에 테마 하나씩 **낱말 10개 → 문장 4개 → 정리 게임** 순서로 배웁니다. 선생님 화면과 학생 화면이 한 주소에 같이 들어 있습니다.
 
-| 회차 | 테마 | 낱말 (예) | 문장 | 정리 게임 |
+| 회차 | 테마 | 낱말 (예) | 바꿔 말하기 문장 틀 | 정리 게임 |
 |---|---|---|---|---|
-| Day 1 | 가족 Family | father, mother, brother, sister … | Who is she? / She is my grandmother. / This is my family. / I love my family. | 짝꿍 카드 |
-| Day 2 | 동물 Animals | dog, cat, rabbit, lion, elephant … | What is it? / It's a rabbit. / I like dogs. / The elephant is big. | 동물 두더지 잡기 |
-| Day 3 | 계절과 날씨 Seasons | spring, summer, sunny, rainy, cold … | What season do you like? / I like summer. / How's the weather? / It's sunny. | 날씨 풍선 팡팡 |
-| Day 4 | 취미 Hobbies | swim, dance, sing, play soccer … | What do you like to do? / I like to swim. / Can you dance? / Yes, I can. | 취미 문장 퍼즐 |
-| Day 5 | 생김새 Looks | tall, short, long hair, glasses, cute … | What does she look like? / She is tall. / She has long hair. / He wears glasses. | 누구일까요? |
+| Day 1 | 가족 Family | father, mother, brother, sister … | This is my ___. | 짝꿍 카드 |
+| Day 2 | 동물 Animals | dog, cat, rabbit, bird … | I like ___. | 두더지 잡기 |
+| Day 3 | 계절과 날씨 Seasons | spring, summer, fall, winter … | It's ___. | 풍선 팡팡 |
+| Day 4 | 취미 Hobbies | swim, dance, sing, draw … | I like to ___. | 문장 퍼즐 |
+| Day 5 | 생김새 Looks | tall, short, big, small … | She has ___. | 누구일까요? |
+| Day 6 | 색깔 Colors | red, orange, yellow, green … | I like ___. | 풍선 팡팡 |
+| Day 7 | 숫자 Numbers | one, two, three, four … | I'm ___ years old. | 철자 퍼즐 |
+| Day 8 | 과일 Fruits | apple, banana, grape, strawberry … | I like ___. | 짝꿍 카드 |
+| Day 9 | 음식 Food | rice, bread, milk, egg … | I want ___. | 문장 퍼즐 |
+| Day 10 | 몸 My Body | eye, ear, nose, mouth … | Touch your ___. | 두더지 잡기 |
+| Day 11 | 옷 Clothes | shirt, pants, dress, shorts … | Put on your ___. | 철자 퍼즐 |
+| Day 12 | 학용품 School Things | book, pencil, pen, ruler … | Can I borrow your ___? | 짝꿍 카드 |
+| Day 13 | 감정 Feelings | happy, sad, angry, tired … | I'm ___. | 풍선 팡팡 |
+| Day 14 | 직업 Jobs | teacher, doctor, cook, farmer … | I want to be a ___. | 문장 퍼즐 |
+| Day 15 | 장소 Places | school, hospital, park, library … | I'm going to the ___. | 두더지 잡기 |
+| Day 16 | 탈것 Transportation | car, bus, bike, train … | I go by ___. | 철자 퍼즐 |
+| Day 17 | 운동 Sports | soccer, baseball, basketball, tennis … | Let's play ___. | 풍선 팡팡 |
+| Day 18 | 하루 일과 My Day | get up, wash my face, brush my teeth, eat breakfast … | I ___ every day. | 문장 퍼즐 |
+| Day 19 | 우리 집 My House | house, bedroom, kitchen, living room … | I'm in the ___. | 짝꿍 카드 |
+| Day 20 | 장난감 Toys | doll, teddy bear, robot, ball … | I have a ___. | 두더지 잡기 |
 
 ## 화면
 
 - **학생** (`#s`): 이름만 쓰고 시작합니다. 크롬북(1366×768) 한 화면에 스크롤 없이 들어가도록 맞췄습니다.
   - ① 낱말 익히기, ② 문장 익히기: 그림을 보고 🔊 듣기 → 🎤 따라 말하기(크롬 음성 인식, 마이크가 막혀 있으면 "따라 말했어요" 단추) → ✏️ 영어 공책 4줄 위 점선 글자를 손가락으로 따라쓰기(얼마나 잘 따라 썼는지 자동으로 봐요). 터치 화면이 없는 크롬북은 자동으로 ⌨️ 키보드로 쓰기가 되고, 틀린 글자는 빨갛게 보여요. 낱말 사이는 ←, → 키로 넘겨요
-  - ③ 정리 게임: 회차마다 미니게임 하나
+  - ③ 바꿔 말하기: 문장 틀(예: I like ___.)의 빈칸에 그림에 맞는 낱말을 골라 넣고, 완성된 문장을 따라 말해요. 회차마다 6개(생김새는 4개)
+  - ④ 정리 게임: 회차마다 미니게임 하나 (짝꿍 카드, 두더지 잡기, 풍선 팡팡, 문장 퍼즐, 철자 퍼즐, 누구일까요?)
 - **선생님** (`#t`)
-  - 수업하기: PPT처럼 띄워 놓고 가르치는 슬라이드 (표지 → 낱말 10장 → What's this? 퀴즈 → 문장 4장 → 짝 대화 → 게임 시범 → 정리). 방향키·스페이스·리모컨으로 넘기기, `S` 읽어 주기, `K` 한글 뜻 숨기기, `F` 전체 화면, 🔤 철자 하나씩 읽어 주기
+  - 수업하기: PPT처럼 띄워 놓고 가르치는 슬라이드 (표지 → 낱말 10장 → What's this? 퀴즈 → 문장 4장 → 짝 대화 → Change & Say 바꿔 말하기 → 게임 시범 → 정리). 방향키·스페이스·리모컨으로 넘기기, `S` 읽어 주기, `K` 한글 뜻 숨기기, `F` 전체 화면, 🔤 철자 하나씩 읽어 주기
   - 학습 결과: 요약 숫자, 회차별 평균 진도율·게임 점수 막대그래프, 학생 × 회차 진도율 표, 회차별 자세한 기록, CSV 내려받기
   - 설정: 학생용 주소와 QR, 구글 시트 연결 확인
 
-진도율 = 낱말·문장의 말하기·쓰기 28칸 중 한 칸 수 × 80% + 게임을 했으면 20%.
+진도율 = 낱말·문장의 말하기·쓰기와 바꿔 말하기의 고르기·말하기 칸 중 한 칸 수 × 80% + 게임을 했으면 20%.
 
 ## 기록 저장 (구글 시트)
 
@@ -44,7 +60,7 @@
 | 파일 | 설명 |
 |---|---|
 | `index.html` | 페이지 |
-| `js/data.js` | 5회차 낱말·문장·게임 (여기를 고치면 내용이 바뀝니다) |
+| `js/data.js` | 20회차 낱말·문장·바꿔 말하기·게임 (여기를 고치면 내용이 바뀝니다) |
 | `js/config.js` | 구글 시트 웹 앱 주소 |
 | `js/art.js` | 생김새 단원 사람 그림 (SVG) |
 | `js/core.js` | 저장, 기록 보내기, 읽어 주기, 음성 인식, 따라쓰기 판 |
