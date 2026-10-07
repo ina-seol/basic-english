@@ -84,31 +84,38 @@ var Student = (function () {
     }
     Cleanup.add(report);
 
+    var touch = (navigator.maxTouchPoints || 0) > 0;
     function render() {
-      var it = items[idx], words = kind === 's' ? wordsOf(it.en) : null;
+      var it = items[idx], words = kind === 's' ? wordsOf(it.en) : null, wmode = store.get('fe-wmode', touch ? 'hand' : 'key');
+      var said = P.s.indexOf(idx) >= 0, wrote = P.t.indexOf(idx) >= 0;
       view.innerHTML =
         '<nav class="crumbs"><a class="btn small" href="#s/' + L.id + '">← Day ' + L.id + '</a><span class="crumb-t">' + (kind === 'w' ? '① 낱말 익히기' : '② 문장 익히기') + '</span>' +
         '<span class="dots">' + items.map(function (x, i) {
           var st = (P.s.indexOf(i) >= 0) + (P.t.indexOf(i) >= 0);
           return '<button class="dot s' + st + (i === idx ? ' cur' : '') + '" data-i="' + i + '" aria-label="' + (i + 1) + '번째' + (st === 2 ? ' 완료' : '') + '">' + (i + 1) + '</button>';
-        }).join('') + '</span></nav>' +
+        }).join('') + '</span>' +
+        '<span class="crumb-nav"><button class="btn small" id="prev"' + (idx === 0 ? ' disabled' : '') + ' aria-label="앞">←</button>' +
+        '<button class="btn small primary" id="next">' + (idx === items.length - 1 ? '끝내기' : '다음 →') + '</button></span></nav>' +
         '<section class="card practice ' + kind + '" style="--c:' + L.color + ';--cl:' + L.light + '">' +
         '<div class="see">' + ART.pic(it.pic, 'big') +
-        '<div class="say-it"><p class="en' + (kind === 's' ? ' sent' : '') + '">' + (words ? words.map(function (w, i) { return '<span data-w="' + i + '">' + esc(it.en.split(' ')[i] || w) + '</span>'; }).join(' ') : esc(it.en)) + '</p>' +
+        '<div class="say-it"><p class="en' + (kind === 's' ? ' sent' : '') + '">' + (words ? it.en.split(' ').map(function (w, i) { return '<span data-w="' + i + '">' + esc(w) + '</span>'; }).join(' ') : esc(it.en)) + '</p>' +
         '<p class="ko">' + esc(it.ko) + '</p>' +
         '<div class="row"><button class="btn primary" id="hear">🔊 듣기</button><button class="btn' + (store.get('fe-slow', false) ? ' on' : '') + '" id="slow" aria-pressed="' + store.get('fe-slow', false) + '">🐢 천천히</button></div></div></div>' +
         '<div class="tasks">' +
-        '<div class="task' + (P.s.indexOf(idx) >= 0 ? ' done' : '') + '" id="tSay"><h2><span class="tn">🎤</span> 따라 말하기 ' + (P.s.indexOf(idx) >= 0 ? '<span class="ok-tag">✓ 했어요</span>' : '') + '</h2>' +
-        '<p class="muted" id="sayMsg">' + (Listen.supported() ? '듣기를 누르고, 말하기를 눌러 크게 따라 말해요.' : '듣기를 누르고 크게 따라 말한 다음 손을 들어요.') + '</p>' +
-        '<div class="row">' + (Listen.supported() ? '<button class="btn mic" id="mic">🎤 말하기</button>' : '') + '<button class="btn" id="selfSay"' + (Listen.supported() ? ' hidden' : '') + '>✋ 따라 말했어요</button></div></div>' +
-        '<div class="task' + (P.t.indexOf(idx) >= 0 ? ' done' : '') + '" id="tWrite"><h2><span class="tn">✏️</span> 따라쓰기 ' + (P.t.indexOf(idx) >= 0 ? '<span class="ok-tag">✓ 했어요</span>' : '') + '</h2>' +
-        '<div id="pad"></div><div class="row"><button class="btn" id="erase">지우기</button><button class="btn primary" id="check">다 썼어요</button><span id="wMsg" class="muted"></span></div></div>' +
-        '</div></section>' +
-        '<div class="nav-row"><button class="btn" id="prev"' + (idx === 0 ? ' disabled' : '') + '>← 앞</button>' +
-        '<button class="btn primary" id="next">' + (idx === items.length - 1 ? '끝내기' : '다음 →') + '</button></div>';
+        '<div class="task' + (said ? ' done' : '') + '" id="tSay"><h2><span class="tn">🎤</span> 따라 말하기 ' + (said ? '<span class="ok-tag">✓ 했어요</span>' : '') + '</h2>' +
+        '<div class="row">' + (Listen.supported() ? '<button class="btn mic" id="mic">🎤 말하기</button>' : '') + '<button class="btn" id="selfSay"' + (Listen.supported() ? ' hidden' : '') + '>✋ 따라 말했어요</button>' +
+        '<p class="muted" id="sayMsg">' + (Listen.supported() ? '듣기를 누르고, 말하기를 눌러 크게 따라 말해요.' : '듣기를 누르고 크게 따라 말한 다음 단추를 눌러요.') + '</p></div></div>' +
+        '<div class="task' + (wrote ? ' done' : '') + '" id="tWrite"><div class="task-h"><h2><span class="tn">✏️</span> 따라쓰기 ' + (wrote ? '<span class="ok-tag">✓ 했어요</span>' : '') + '</h2>' +
+        '<span class="seg" role="group" aria-label="쓰는 방법"><button class="' + (wmode === 'hand' ? 'on' : '') + '" data-m="hand" aria-pressed="' + (wmode === 'hand') + '">✋ 손으로</button><button class="' + (wmode === 'key' ? 'on' : '') + '" data-m="key" aria-pressed="' + (wmode === 'key') + '">⌨️ 키보드로</button></span></div>' +
+        (wmode === 'hand'
+          ? '<div id="pad"></div><div class="row"><button class="btn" id="erase">지우기</button><button class="btn primary" id="check">다 썼어요</button><span id="wMsg" class="muted"></span></div>'
+          : '<div class="typeit"><p class="ghost" id="ghost" aria-hidden="true">' + it.en.split('').map(function (c) { return '<span>' + (c === ' ' ? '&nbsp;' : esc(c)) + '</span>'; }).join('') + '</p>' +
+            '<label class="sr" for="typ">' + esc(it.en) + ' 쳐 보기</label><input id="typ" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="여기에 똑같이 쳐요"></div>' +
+            '<div class="row"><button class="btn primary" id="check">다 썼어요</button><span id="wMsg" class="muted">대문자, 소문자는 상관없어요.</span></div>') +
+        '</div></div></section>';
 
-      if (pad) pad.destroy();
-      pad = new TracePad($('#pad'), it.en, { max: kind === 'w' ? 120 : 96, min: kind === 's' ? 70 : 0, color: '#2B4789' });
+      if (pad) { pad.destroy(); pad = null; }
+      if (wmode === 'hand') pad = new TracePad($('#pad'), it.en, { max: Math.min(kind === 'w' ? 120 : 96, Math.round(innerHeight * (kind === 'w' ? .16 : .13))), min: kind === 's' ? Math.min(70, Math.round(innerHeight * .082)) : 0, color: '#2B4789' });
       var hear = function () {
         var spans = $$('.en span[data-w]', view);
         Voice.say(it.en, {
@@ -123,7 +130,7 @@ var Student = (function () {
         Voice.stop(); mic.disabled = true; mic.classList.add('listening'); mic.textContent = '듣고 있어요…'; $('#sayMsg').textContent = '지금 말해요!';
         Listen.listen(it.en).then(function (r) {
           mic.disabled = false; mic.classList.remove('listening'); mic.textContent = '🎤 다시 말하기';
-          if (!r.supported) { $('#sayMsg').textContent = '마이크를 쓸 수 없어요. 크게 따라 말하고 손을 들어요.'; mic.hidden = true; $('#selfSay').hidden = false; return; }
+          if (!r.supported) { $('#sayMsg').textContent = '마이크를 쓸 수 없어요. 크게 따라 말하고 단추를 눌러요.'; mic.hidden = true; $('#selfSay').hidden = false; return; }
           if (r.ok) { Sound.good(); tries = 0; $('#sayMsg').innerHTML = '👏 <b>잘했어요!</b> 들린 말: “' + esc(r.heard) + '”'; mark('s'); $('#tSay').classList.add('done'); refreshDots(); }
           else {
             Sound.bad(); tries++;
@@ -133,18 +140,43 @@ var Student = (function () {
         });
       };
       $('#selfSay').onclick = function () { Sound.good(); mark('s'); $('#tSay').classList.add('done'); $('#sayMsg').textContent = '👏 잘했어요!'; refreshDots(); };
-      $('#erase').onclick = function () { pad.clear(); $('#wMsg').textContent = ''; };
-      $('#check').onclick = function () {
-        var r = pad.check();
-        if (r.empty) { $('#wMsg').textContent = '점선 글자를 따라 써요.'; return; }
-        if (r.ok) { Sound.good(); var st = r.score >= 85 ? 3 : r.score >= 68 ? 2 : 1; $('#wMsg').innerHTML = stars(st) + ' 잘 썼어요!'; mark('t'); $('#tWrite').classList.add('done'); refreshDots(); }
-        else { Sound.bad(); $('#wMsg').textContent = r.near < .5 ? '선 밖으로 많이 나갔어요. 지우고 다시 써요.' : '점선을 조금 더 따라 써요.'; }
-      };
+      function wroteOk(msg) { Sound.good(); $('#wMsg').innerHTML = msg; mark('t'); $('#tWrite').classList.add('done'); refreshDots(); }
+      if (wmode === 'hand') {
+        $('#erase').onclick = function () { pad.clear(); $('#wMsg').textContent = ''; };
+        $('#check').onclick = function () {
+          var r = pad.check();
+          if (r.empty) { $('#wMsg').textContent = '점선 글자를 따라 써요.'; return; }
+          if (r.ok) wroteOk(stars(r.score >= 85 ? 3 : r.score >= 68 ? 2 : 1) + ' 잘 썼어요!');
+          else { Sound.bad(); $('#wMsg').textContent = r.near < .5 ? '선 밖으로 많이 나갔어요. 지우고 다시 써요.' : '점선을 조금 더 따라 써요.'; }
+        };
+      } else {
+        var typ = $('#typ'), gs = $$('#ghost span', view), done1 = false;
+        var simp = function (t) { return t.toLowerCase().replace(/’/g, "'").replace(/[^a-z' ]/g, '').replace(/\s+/g, ' ').trim(); };
+        var good1 = function () { if (done1) return; done1 = true; wroteOk('👏 잘 썼어요!'); Voice.say(it.en); };
+        typ.oninput = function () {
+          var v = typ.value;
+          gs.forEach(function (g, i) { g.className = i >= v.length ? '' : v[i].toLowerCase() === it.en[i].toLowerCase() ? 'ok' : 'no'; });
+          if (simp(v) === simp(it.en)) good1();
+        };
+        typ.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); $('#check').click(); } };
+        $('#check').onclick = function () {
+          if (simp(typ.value) === simp(it.en)) return good1();
+          Sound.bad(); $('#wMsg').textContent = typ.value ? '빨간 글자를 고쳐 봐요.' : '위 글자를 보고 똑같이 쳐요.'; typ.focus();
+        };
+      }
+      $$('.seg button', view).forEach(function (b) { b.onclick = function () { store.set('fe-wmode', b.dataset.m); Voice.stop(); render(); }; });
       $('#prev').onclick = function () { if (idx > 0) { idx--; tries = 0; render(); } };
       $('#next').onclick = function () { if (idx < items.length - 1) { idx++; tries = 0; render(); } else finish(); };
       $$('.dot', view).forEach(function (d) { d.onclick = function () { idx = +d.dataset.i; tries = 0; render(); }; });
       setTimeout(hear, 350);
     }
+    function onKey(e) {
+      if ((e.target.closest && e.target.closest('input,textarea')) || !$('#next')) return;
+      if (e.key === 'ArrowRight') { e.preventDefault(); $('#next').click(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); $('#prev').click(); }
+    }
+    document.addEventListener('keydown', onKey);
+    Cleanup.add(function () { document.removeEventListener('keydown', onKey); });
     function refreshDots() {
       $$('.dot', view).forEach(function (d) { var i = +d.dataset.i, st = (P.s.indexOf(i) >= 0) + (P.t.indexOf(i) >= 0); d.className = 'dot s' + st + (i === idx ? ' cur' : ''); });
     }
