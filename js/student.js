@@ -1,0 +1,188 @@
+/* 학생 화면: 이름 → 회차 고르기 → ① 낱말 ② 문장 ③ 정리 게임 */
+var Student = (function () {
+  function me() { return store.get('fe-name', ''); }
+
+  function nameView(view) {
+    var used = store.get('fe-names', []);
+    view.innerHTML =
+      '<section class="panel name-panel">' +
+      '<div class="name-hero" aria-hidden="true">👋</div>' +
+      '<h1>이름을 써 주세요</h1><p class="muted">이름만 쓰면 돼요. 공부한 기록은 선생님께 저장돼요.</p>' +
+      '<form id="nameForm" class="name-form"><label class="sr" for="nm">이름</label>' +
+      '<input id="nm" maxlength="12" autocomplete="off" placeholder="예: 김하늘" value="' + esc(me()) + '">' +
+      '<button class="btn primary big">시작하기</button></form>' +
+      (used.length ? '<div class="used"><span class="muted">이 기기에서 쓴 이름</span>' + used.map(function (n) { return '<button class="chip" data-n="' + esc(n) + '">' + esc(n) + '</button>'; }).join('') + '</div>' : '') +
+      '</section>';
+    function go(n) {
+      n = n.replace(/\s+/g, ' ').trim().slice(0, 12);
+      if (!n) { toast('이름을 써 주세요'); $('#nm').focus(); return; }
+      store.set('fe-name', n);
+      var u = store.get('fe-names', []).filter(function (x) { return x !== n; }); u.unshift(n); store.set('fe-names', u.slice(0, 40));
+      if (Sync.url()) Sync.get({ action: 'mine', name: n }).then(function (d) { if (d && d.rows) { Progress.merge(n, d.rows); if (location.hash === '#s') App.render(); } }).catch(function () { });
+      location.hash = '#s';
+    }
+    $('#nameForm').onsubmit = function (e) { e.preventDefault(); go($('#nm').value); };
+    $$('.chip[data-n]', view).forEach(function (b) { b.onclick = function () { go(b.dataset.n); }; });
+    setTimeout(function () { var i = $('#nm'); if (i) i.focus(); }, 50);
+  }
+
+  function counts(l, L) {
+    return { ws: l.w.s.length, wt: l.w.t.length, ss: l.s.s.length, st: l.s.t.length, wn: L.words.length, sn: L.sentences.length };
+  }
+
+  function homeView(view) {
+    var n = me();
+    view.innerHTML =
+      '<section class="hello"><div><p class="eyebrow">오늘도 영어 한 걸음</p><h1>안녕, ' + esc(n) + '!</h1></div>' +
+      '<button class="btn small" id="chg">이름 바꾸기</button></section>' +
+      '<div class="days">' + LESSONS.map(function (L) {
+        var l = Progress.lesson(n, L.id), c = counts(l, L);
+        var done = c.ws + c.wt + c.ss + c.st === 2 * (c.wn + c.sn) && l.g.plays > 0;
+        return '<a class="day' + (done ? ' done' : '') + '" href="#s/' + L.id + '" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+          '<span class="day-ill"><b>Day ' + L.id + '</b><span class="day-emo">' + L.icon + '</span></span>' +
+          '<span class="day-body"><span class="day-t">' + L.theme + ' <small>' + L.ko + '</small></span>' +
+          '<span class="day-steps">' +
+          '<span class="pill' + (c.ws + c.wt === 2 * c.wn ? ' ok' : '') + '">낱말 ' + Math.min(c.ws, c.wt) + '/' + c.wn + '</span>' +
+          '<span class="pill' + (c.ss + c.st === 2 * c.sn ? ' ok' : '') + '">문장 ' + Math.min(c.ss, c.st) + '/' + c.sn + '</span>' +
+          '<span class="pill' + (l.g.plays ? ' ok' : '') + '">게임 ' + (l.g.plays ? stars(l.g.stars) : '–') + '</span></span></span>' +
+          (done ? '<span class="badge-done" aria-label="완료">✓</span>' : '') + '</a>';
+      }).join('') + '</div>';
+    $('#chg').onclick = function () { location.hash = '#s/name'; };
+  }
+
+  function lessonView(view, L) {
+    var n = me(), l = Progress.lesson(n, L.id), c = counts(l, L), G = GAMES[L.game];
+    view.innerHTML =
+      '<nav class="crumbs"><a class="btn small" href="#s">← 회차 목록</a></nav>' +
+      '<section class="lesson-head" style="--c:' + L.color + ';--cl:' + L.light + '"><span class="lh-emo" aria-hidden="true">' + L.icon + '</span>' +
+      '<div><p class="eyebrow">Day ' + L.id + '</p><h1>' + L.theme + ' <span class="ko">' + L.ko + '</span></h1><p>' + L.goal + '</p></div></section>' +
+      '<div class="steps" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+      step(1, '낱말 익히기', '듣고 · 따라 말하고 · 따라 써요', '#s/' + L.id + '/w', [['말하기', c.ws, c.wn], ['쓰기', c.wt, c.wn]], L.words.slice(0, 4).map(function (w) { return w.pic.p ? '🙂' : w.pic; }).join('')) +
+      step(2, '문장 익히기', '문장 4개를 듣고 말하고 써요', '#s/' + L.id + '/s', [['말하기', c.ss, c.sn], ['쓰기', c.st, c.sn]], '💬') +
+      step(3, G.name, G.how, '#s/' + L.id + '/g', null, G.icon, l.g) +
+      '</div>';
+  }
+  function step(no, t, sub, href, bars, ill, g) {
+    return '<a class="step" href="' + href + '"><span class="step-no">' + no + '</span><span class="step-ill" aria-hidden="true">' + ill + '</span>' +
+      '<span class="step-body"><b>' + t + '</b><small>' + sub + '</small>' +
+      (bars ? '<span class="bars">' + bars.map(function (b) { return '<span class="bar"><i style="width:' + (b[1] / b[2] * 100) + '%"></i></span><em>' + b[0] + ' ' + b[1] + '/' + b[2] + '</em>'; }).join('') + '</span>'
+        : '<span class="bars">' + (g.plays ? '최고 ' + g.best + '점 ' + stars(g.stars) : '<em>아직 안 했어요</em>') + '</span>') +
+      '</span></a>';
+  }
+
+  /* ---- ①② 낱말·문장 연습 ---- */
+  function practice(view, L, kind) {
+    var n = me(), items = kind === 'w' ? L.words : L.sentences, prog = Progress.lesson(n, L.id), P = prog[kind];
+    var idx = 0, pad = null, dirty = false, tries = 0;
+    for (var i = 0; i < items.length; i++) if (P.s.indexOf(i) < 0 || P.t.indexOf(i) < 0) { idx = i; break; }
+
+    function mark(k) { if (P[k].indexOf(idx) < 0) { P[k].push(idx); dirty = true; Progress.save(n, L.id, prog); } }
+    function report() {
+      if (!dirty) return; dirty = false;
+      var tot = items.length, sc = Math.round((P.s.length + P.t.length) / (2 * tot) * 100);
+      Sync.send({ name: n, lesson: L.id, theme: L.ko, part: kind === 'w' ? 'words' : 'sentences', said: P.s.length, wrote: P.t.length, total: tot, score: sc, stars: sc >= 100 ? 3 : sc >= 70 ? 2 : sc >= 40 ? 1 : 0, items: JSON.stringify({ s: P.s, t: P.t }) });
+    }
+    Cleanup.add(report);
+
+    function render() {
+      var it = items[idx], words = kind === 's' ? wordsOf(it.en) : null;
+      view.innerHTML =
+        '<nav class="crumbs"><a class="btn small" href="#s/' + L.id + '">← Day ' + L.id + '</a><span class="crumb-t">' + (kind === 'w' ? '① 낱말 익히기' : '② 문장 익히기') + '</span>' +
+        '<span class="dots">' + items.map(function (x, i) {
+          var st = (P.s.indexOf(i) >= 0) + (P.t.indexOf(i) >= 0);
+          return '<button class="dot s' + st + (i === idx ? ' cur' : '') + '" data-i="' + i + '" aria-label="' + (i + 1) + '번째' + (st === 2 ? ' 완료' : '') + '">' + (i + 1) + '</button>';
+        }).join('') + '</span></nav>' +
+        '<section class="card practice ' + kind + '" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+        '<div class="see">' + ART.pic(it.pic, 'big') +
+        '<div class="say-it"><p class="en' + (kind === 's' ? ' sent' : '') + '">' + (words ? words.map(function (w, i) { return '<span data-w="' + i + '">' + esc(it.en.split(' ')[i] || w) + '</span>'; }).join(' ') : esc(it.en)) + '</p>' +
+        '<p class="ko">' + esc(it.ko) + '</p>' +
+        '<div class="row"><button class="btn primary" id="hear">🔊 듣기</button><button class="btn' + (store.get('fe-slow', false) ? ' on' : '') + '" id="slow" aria-pressed="' + store.get('fe-slow', false) + '">🐢 천천히</button></div></div></div>' +
+        '<div class="tasks">' +
+        '<div class="task' + (P.s.indexOf(idx) >= 0 ? ' done' : '') + '" id="tSay"><h2><span class="tn">🎤</span> 따라 말하기 ' + (P.s.indexOf(idx) >= 0 ? '<span class="ok-tag">✓ 했어요</span>' : '') + '</h2>' +
+        '<p class="muted" id="sayMsg">' + (Listen.supported() ? '듣기를 누르고, 말하기를 눌러 크게 따라 말해요.' : '듣기를 누르고 크게 따라 말한 다음 손을 들어요.') + '</p>' +
+        '<div class="row">' + (Listen.supported() ? '<button class="btn mic" id="mic">🎤 말하기</button>' : '') + '<button class="btn" id="selfSay"' + (Listen.supported() ? ' hidden' : '') + '>✋ 따라 말했어요</button></div></div>' +
+        '<div class="task' + (P.t.indexOf(idx) >= 0 ? ' done' : '') + '" id="tWrite"><h2><span class="tn">✏️</span> 따라쓰기 ' + (P.t.indexOf(idx) >= 0 ? '<span class="ok-tag">✓ 했어요</span>' : '') + '</h2>' +
+        '<div id="pad"></div><div class="row"><button class="btn" id="erase">지우기</button><button class="btn primary" id="check">다 썼어요</button><span id="wMsg" class="muted"></span></div></div>' +
+        '</div></section>' +
+        '<div class="nav-row"><button class="btn" id="prev"' + (idx === 0 ? ' disabled' : '') + '>← 앞</button>' +
+        '<button class="btn primary" id="next">' + (idx === items.length - 1 ? '끝내기' : '다음 →') + '</button></div>';
+
+      if (pad) pad.destroy();
+      pad = new TracePad($('#pad'), it.en, { max: kind === 'w' ? 120 : 96, min: kind === 's' ? 70 : 0, color: '#2B4789' });
+      var hear = function () {
+        var spans = $$('.en span[data-w]', view);
+        Voice.say(it.en, {
+          onboundary: function (e) { if (e.name !== 'word' && e.name) return; var k = it.en.slice(0, e.charIndex).split(' ').length - 1; spans.forEach(function (s, i) { s.classList.toggle('lit', i === k); }); },
+          onend: function () { spans.forEach(function (s) { s.classList.remove('lit'); }); }
+        });
+      };
+      $('#hear').onclick = hear;
+      $('#slow').onclick = function () { var v = !store.get('fe-slow', false); store.set('fe-slow', v); this.classList.toggle('on', v); this.setAttribute('aria-pressed', v); hear(); };
+      var mic = $('#mic');
+      if (mic) mic.onclick = function () {
+        Voice.stop(); mic.disabled = true; mic.classList.add('listening'); mic.textContent = '듣고 있어요…'; $('#sayMsg').textContent = '지금 말해요!';
+        Listen.listen(it.en).then(function (r) {
+          mic.disabled = false; mic.classList.remove('listening'); mic.textContent = '🎤 다시 말하기';
+          if (!r.supported) { $('#sayMsg').textContent = '마이크를 쓸 수 없어요. 크게 따라 말하고 손을 들어요.'; mic.hidden = true; $('#selfSay').hidden = false; return; }
+          if (r.ok) { Sound.good(); tries = 0; $('#sayMsg').innerHTML = '👏 <b>잘했어요!</b> 들린 말: “' + esc(r.heard) + '”'; mark('s'); $('#tSay').classList.add('done'); refreshDots(); }
+          else {
+            Sound.bad(); tries++;
+            $('#sayMsg').innerHTML = (r.heard ? '들린 말: “' + esc(r.heard) + '”. ' : '잘 안 들렸어요. ') + '한 번 더 크게 말해 볼까요?';
+            if (tries >= 2) $('#selfSay').hidden = false;
+          }
+        });
+      };
+      $('#selfSay').onclick = function () { Sound.good(); mark('s'); $('#tSay').classList.add('done'); $('#sayMsg').textContent = '👏 잘했어요!'; refreshDots(); };
+      $('#erase').onclick = function () { pad.clear(); $('#wMsg').textContent = ''; };
+      $('#check').onclick = function () {
+        var r = pad.check();
+        if (r.empty) { $('#wMsg').textContent = '점선 글자를 따라 써요.'; return; }
+        if (r.ok) { Sound.good(); var st = r.score >= 85 ? 3 : r.score >= 68 ? 2 : 1; $('#wMsg').innerHTML = stars(st) + ' 잘 썼어요!'; mark('t'); $('#tWrite').classList.add('done'); refreshDots(); }
+        else { Sound.bad(); $('#wMsg').textContent = r.near < .5 ? '선 밖으로 많이 나갔어요. 지우고 다시 써요.' : '점선을 조금 더 따라 써요.'; }
+      };
+      $('#prev').onclick = function () { if (idx > 0) { idx--; tries = 0; render(); } };
+      $('#next').onclick = function () { if (idx < items.length - 1) { idx++; tries = 0; render(); } else finish(); };
+      $$('.dot', view).forEach(function (d) { d.onclick = function () { idx = +d.dataset.i; tries = 0; render(); }; });
+      setTimeout(hear, 350);
+    }
+    function refreshDots() {
+      $$('.dot', view).forEach(function (d) { var i = +d.dataset.i, st = (P.s.indexOf(i) >= 0) + (P.t.indexOf(i) >= 0); d.className = 'dot s' + st + (i === idx ? ' cur' : ''); });
+    }
+    function finish() {
+      report();
+      var tot = items.length, all = P.s.length === tot && P.t.length === tot;
+      if (all) { Sound.win(); confetti(); }
+      view.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+        '<div class="result-emo">' + (all ? '🏆' : '💪') + '</div><h1>' + (all ? '모두 해냈어요!' : '거의 다 왔어요!') + '</h1>' +
+        '<p class="big-n">말하기 <b>' + P.s.length + '</b>/' + tot + ' · 쓰기 <b>' + P.t.length + '</b>/' + tot + '</p>' +
+        (all ? '' : '<p class="muted">빈 칸이 있는 번호를 눌러 마저 해요.</p>') +
+        '<div class="row center">' + (all ? '' : '<button class="btn" id="again">마저 하기</button>') +
+        '<a class="btn primary" href="#s/' + L.id + '/' + (kind === 'w' ? 's' : 'g') + '">' + (kind === 'w' ? '② 문장 익히기 →' : '③ 정리 게임 →') + '</a></div></section>';
+      var a = $('#again'); if (a) a.onclick = function () { for (var i = 0; i < items.length; i++) if (P.s.indexOf(i) < 0 || P.t.indexOf(i) < 0) { idx = i; break; } render(); };
+    }
+    Cleanup.add(function () { if (pad) pad.destroy(); });
+    render();
+  }
+
+  /* ---- ③ 정리 게임 ---- */
+  function gameView(view, L) {
+    var n = me(), G = GAMES[L.game];
+    view.innerHTML = '<nav class="crumbs"><a class="btn small" href="#s/' + L.id + '">← Day ' + L.id + '</a><span class="crumb-t">③ ' + G.name + '</span></nav><div id="game"></div>';
+    Games.start($('#game'), L, function (res) {
+      var prog = Progress.lesson(n, L.id);
+      prog.g.best = Math.max(prog.g.best, res.score); prog.g.stars = Math.max(prog.g.stars, res.stars); prog.g.plays++;
+      Progress.save(n, L.id, prog);
+      Sync.send({ name: n, lesson: L.id, theme: L.ko, part: 'game', said: '', wrote: '', total: res.total || '', score: res.score, stars: res.stars, items: G.name });
+    });
+  }
+
+  function route(view, parts) {
+    if (parts[0] === 'name' || !me()) return nameView(view);
+    var L = parts[0] && lessonById(parts[0]);
+    if (!L) return homeView(view);
+    if (parts[1] === 'w' || parts[1] === 's') return practice(view, L, parts[1]);
+    if (parts[1] === 'g') return gameView(view, L);
+    lessonView(view, L);
+  }
+  return { route: route, me: me };
+})();
