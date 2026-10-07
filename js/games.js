@@ -1,19 +1,19 @@
 /* 정리 게임 5종: 회차마다 하나씩. Games.start(host, lesson, onDone) */
 var Games = (function () {
   function head(host, L, label) {
-    host.innerHTML = '<div class="game g-' + L.game + '" style="--c:' + L.color + ';--cl:' + L.light + '"><div class="hud">' + label + '</div><div class="stage"></div></div>';
+    host.innerHTML = '<div class="game g-' + L.game + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><div class="hud">' + label + '</div><div class="stage"></div></div>';
     return { hud: $('.hud', host), stage: $('.stage', host), root: $('.game', host) };
   }
   function intro(host, L, go) {
     var G = GAMES[L.game];
-    host.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + '"><div class="result-emo">' + G.icon + '</div><h1>' + G.name + '</h1><p class="lead">' + G.how + '</p>' +
+    host.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><div class="result-emo">' + ART.burst('#FFF2CC') + '<span>' + G.icon + '</span></div><h1>' + G.name + '</h1><p class="lead">' + G.how + '</p>' +
       '<div class="row center"><button class="btn primary big" id="play">시작!</button></div></section>';
     $('#play').onclick = function () { Sound.tap(); go(); };
   }
   function result(host, L, res, onDone, again) {
     onDone(res);
     if (res.stars >= 2) { Sound.win(); confetti(); }
-    host.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + '"><div class="result-emo">' + (res.stars >= 3 ? '🏆' : res.stars === 2 ? '🎉' : '👍') + '</div>' +
+    host.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><div class="result-emo">' + ART.burst('#FFF2CC') + '<span>' + (res.stars >= 3 ? '🏆' : res.stars === 2 ? '🎉' : '👍') + '</span></div>' +
       '<h1>' + (res.stars >= 3 ? '최고예요!' : res.stars === 2 ? '잘했어요!' : '좋아요, 한 번 더!') + '</h1>' + stars(res.stars) +
       '<p class="big-n"><b>' + res.score + '</b>점</p><p class="muted">' + esc(res.note || '') + '</p>' +
       '<div class="row center"><button class="btn" id="again">다시 하기</button>' + (location.hash.indexOf('#t') === 0 ? '' : '<a class="btn primary" href="#s">회차 목록</a>') + '</div></section>';
@@ -157,7 +157,7 @@ var Games = (function () {
 
   /* Day 5 누구일까요: 설명을 듣고 친구 찾기 */
   var NAMES = { she: ['Amy', 'Mina', 'Lily', 'Sora', 'Jenny', 'Emma'], he: ['Tom', 'Jun', 'Ben', 'Max', 'Sam', 'Leo'] };
-  var SHIRTS = ['#E36D98', '#2B8AC9', '#10B183', '#E89A3C', '#7A5CC9', '#E7C33A'];
+  var SHIRTS = ['#E74C3C', '#0295A9', '#3FA34D', '#F28C28', '#036370', '#FFBB12'];
   function makePeople() {
     var used = {}, ppl = [], sheN = shuffle(NAMES.she), heN = shuffle(NAMES.he), tries = 0;
     while (ppl.length < 4 && tries++ < 200) {

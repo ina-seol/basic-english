@@ -8,14 +8,15 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Poppins:wght@400;500;600;700&family=Noto+Color+Emoji&display=swap">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="#"><span aria-hidden="true">🎒</span>영어 첫걸음</a>
-  <div class="top-actions"><span id="who"></span><button class="btn small" id="snd" aria-pressed="true">🔊 소리 켬</button></div>
-</header>
+<header class="topbar"><div class="top">
+  <a class="brand" href="#" aria-label="영어 첫걸음 처음으로"><span class="logo" aria-hidden="true"><b>영</b><b>어</b> <b>첫</b><b>걸</b><b>음</b></span></a>
+  <nav class="top-nav" aria-label="바로가기"><a href="#s">학생</a><a href="#t">수업하기</a><a href="#t/rec">학습 결과</a></nav>
+  <div class="top-actions"><span id="who"></span><button class="btn small dark" id="snd" aria-pressed="true">🔊 소리 켬</button></div>
+</div></header>
 <main id="view"></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 <script src="js/config.js" defer></script>

@@ -2,7 +2,7 @@
    pic: 이모지 글자, 또는 { p: 사람 그림 이름 } (art.js 의 그림) */
 var LESSONS = [
   {
-    id: 1, theme: 'Family', ko: '가족', color: '#E36D98', light: '#FBE3EC', icon: '👨‍👩‍👧‍👦',
+    id: 1, theme: 'Family', ko: '가족', color: '#E74C3C', light: '#FDE4E1', on: '#fff', icon: '🏡',
     goal: '가족을 영어로 소개해요',
     words: [
       { en: 'father', ko: '아빠, 아버지', pic: '👨' },
@@ -14,18 +14,18 @@ var LESSONS = [
       { en: 'baby', ko: '아기', pic: '👶' },
       { en: 'uncle', ko: '삼촌', pic: '🧔' },
       { en: 'aunt', ko: '이모, 고모', pic: '👩‍🦱' },
-      { en: 'family', ko: '가족', pic: '👨‍👩‍👧‍👦' }
+      { en: 'family', ko: '가족', pic: '👨👩👧👦' }
     ],
     sentences: [
       { en: 'Who is she?', ko: '그녀는 누구니?', pic: '👵❓', who: 'A' },
       { en: 'She is my grandmother.', ko: '그녀는 우리 할머니야.', pic: '👵', who: 'B' },
-      { en: 'This is my family.', ko: '이쪽은 우리 가족이야.', pic: '👨‍👩‍👧‍👦', who: 'A' },
-      { en: 'I love my family.', ko: '나는 우리 가족을 사랑해.', pic: '❤️👨‍👩‍👧‍👦', who: 'B' }
+      { en: 'This is my family.', ko: '이쪽은 우리 가족이야.', pic: '👨👩👧👦', who: 'A' },
+      { en: 'I love my family.', ko: '나는 우리 가족을 사랑해.', pic: '👨👩👧❤️', who: 'B' }
     ],
     game: 'memory'
   },
   {
-    id: 2, theme: 'Animals', ko: '동물', color: '#10B183', light: '#D4F1E7', icon: '🦁',
+    id: 2, theme: 'Animals', ko: '동물', color: '#E0751B', light: '#FDEBD6', on: '#fff', icon: '🦁',
     goal: '동물 이름을 말하고 좋아하는 동물을 말해요',
     words: [
       { en: 'dog', ko: '개', pic: '🐶' },
@@ -48,7 +48,7 @@ var LESSONS = [
     game: 'mole'
   },
   {
-    id: 3, theme: 'Seasons', ko: '계절과 날씨', color: '#2B8AC9', light: '#DCEDF8', icon: '🌸',
+    id: 3, theme: 'Seasons', ko: '계절과 날씨', color: '#0295A9', light: '#DDF4F8', on: '#fff', icon: '🌸',
     goal: '좋아하는 계절과 날씨를 말해요',
     words: [
       { en: 'spring', ko: '봄', pic: '🌸' },
@@ -71,7 +71,7 @@ var LESSONS = [
     game: 'balloon'
   },
   {
-    id: 4, theme: 'Hobbies', ko: '취미', color: '#E89A3C', light: '#FCEBD5', icon: '⚽',
+    id: 4, theme: 'Hobbies', ko: '취미', color: '#FFBB12', light: '#FFF2CC', on: '#3A2A00', icon: '⚽',
     goal: '좋아하는 것과 할 수 있는 것을 말해요',
     words: [
       { en: 'swim', ko: '수영하다', pic: '🏊' },
@@ -94,7 +94,7 @@ var LESSONS = [
     game: 'puzzle'
   },
   {
-    id: 5, theme: 'Looks', ko: '생김새', color: '#7A5CC9', light: '#E9E2F8', icon: '👓',
+    id: 5, theme: 'Looks', ko: '생김새', color: '#3FA34D', light: '#E1F3E2', on: '#fff', icon: '👓',
     goal: '사람의 생김새를 말해요',
     words: [
       { en: 'tall', ko: '키가 큰', pic: { p: 'tall' } },

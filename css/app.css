@@ -1,16 +1,21 @@
-/* 영어 첫걸음 — 낱말 놀이터와 같은 결: 흰 바탕, SB 어그로, 회차마다 색 하나 */
+/* 영어 첫걸음 — 크림 종이 위 그림책 + 어린이 학교 웹사이트 느낌, 회차마다 색 하나 */
 @font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroL.woff) format('woff'); font-weight: 300; font-display: swap; }
 @font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroM.woff) format('woff'); font-weight: 500; font-display: swap; }
 @font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroB.woff) format('woff'); font-weight: 700; font-display: swap; }
 :root {
-  --ink: #1A1C21; --ink-soft: #6B6F76; --royal: #2B4789; --line: #E4E5E9; --bg: #FFFFFF; --soft: #F4F5F7;
-  --good: #0A7F5E; --good-lt: #D4F1E7; --bad: #B8325C; --bad-lt: #FBE3EC; --canary: #E7DD6A; --canary-lt: #F8F4CC;
-  --c: #2B4789; --cl: #E6ECF8;
-  --shadow: 0 1px 2px rgba(16,24,40,.06), 0 6px 16px -4px rgba(16,24,40,.08); --shadow-sm: 0 1px 2px rgba(16,24,40,.08);
-  --font: "Aggravo", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
-  --en: "Andika", "Aggravo", system-ui, sans-serif;
+  /* Kids Park 색: 청록(주색) · 빨강 · 노랑 · 초록 / 그림책 색: 크림 종이, 따뜻한 갈색 글자 */
+  --teal: #0295A9; --teal-dk: #036370; --teal-lt: #21C1D7;
+  --red: #E74C3C; --red-dk: #B8382B; --yellow: #FFBB12; --green: #10C700; --green-dk: #0A7F2E;
+  --ink: #2E2420; --ink-soft: #75655A; --royal: #036370; --line: #ECDDC9; --bg: #FFF8EE; --paper: #FFFDF8; --soft: #F6ECDF;
+  --good: #0A7F2E; --good-lt: #E3F6E0; --bad: #C2402F; --bad-lt: #FDE4E1; --canary: #FFBB12; --canary-lt: #FFF2CC;
+  --c: #0295A9; --cl: #DDF4F8; --on: #fff;
+  --shadow: 0 1px 0 rgba(120,90,60,.08), 0 8px 20px -10px rgba(90,60,30,.28); --shadow-sm: 0 1px 0 rgba(120,90,60,.1);
+  --font: "Poppins", "Aggravo", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-en: "Poppins", system-ui, sans-serif;
+  --en: "Andika", "Poppins", system-ui, sans-serif;
   --emoji: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-  --r: 18px; --rc: 12px;
+  --cloud: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cg fill='%23000'%3E%3Ccircle cx='40' cy='62' r='30'/%3E%3Ccircle cx='80' cy='44' r='38'/%3E%3Ccircle cx='126' cy='48' r='34'/%3E%3Ccircle cx='162' cy='62' r='28'/%3E%3Ccircle cx='102' cy='72' r='28'/%3E%3Ccircle cx='60' cy='76' r='22'/%3E%3Ccircle cx='146' cy='78' r='20'/%3E%3C/g%3E%3C/svg%3E");
+  --r: 22px; --rc: 14px;
   color-scheme: light;
 }
 * { box-sizing: border-box; }
@@ -276,7 +281,7 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: .9em; backgrou
 .deck-top { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 .deck-top b { font-size: 18px; }
 .deck-top .muted { margin-left: auto; font-weight: 500; }
-.deck { position: relative; container-type: inline-size; width: min(100%, calc((100vh - 245px) * 16 / 9)); margin: 0 auto; aspect-ratio: 16 / 9; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
+.deck { position: relative; container-type: inline-size; width: min(100%, calc((100vh - 225px) * 16 / 9)); margin: 0 auto; aspect-ratio: 16 / 9; background: #fff; border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
 .deck-wrap:fullscreen .deck { width: min(100%, calc((100vh - 110px) * 16 / 9)); }
 .deck::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1.4cqw; background: var(--c); }
 .slide { position: absolute; inset: 0; padding: 4cqw 5cqw 4cqw 6.4cqw; display: grid; align-items: center; animation: slideIn .28s cubic-bezier(.2,.9,.3,1); }
@@ -447,3 +452,194 @@ tbody th { text-align: left; font-weight: 700; }
   .pz-q { font-size: 64px; }
 }
 @media (min-width: 900px) { .practice.s .see .pic.big { width: min(190px, 25vh); height: min(190px, 25vh); font-size: min(130px, 17vh); } }
+
+/* =====================================================================
+   디자인 2 — 두 Figma 참고를 합침
+   · Kids Park 웹사이트: 청록 머리띠, 알록달록 로고, 알약 단추(빨강·노랑·청록), 노란 강조 카드, 숫자+아이콘 줄, Poppins
+   · Little book for kindergarten: 크림색 종이, 가을 숲 꾸밈(잎·도토리·버섯·나무), 구름 모양, 볼이 발그레한 그림, 쪽 번호
+   ===================================================================== */
+body { background: var(--bg); }
+.deco, .bits { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* 머리띠 */
+.topbar { background: var(--teal); box-shadow: 0 2px 0 var(--teal-dk); position: relative; z-index: 3; margin-bottom: 14px; }
+.topbar .top { padding-block: 10px; color: #fff; }
+.logo { display: inline-flex; align-items: baseline; gap: 1px; font-weight: 700; font-size: 28px; letter-spacing: -.02em; line-height: 1; }
+.logo b { display: inline-block; text-shadow: 0 2px 0 rgba(3, 60, 70, .35); transition: transform .25s cubic-bezier(.2,.9,.3,1.5); }
+.logo b:nth-child(1) { color: var(--yellow); transform: rotate(-6deg); }
+.logo b:nth-child(2) { color: #fff; transform: translateY(-2px) rotate(4deg); }
+.logo b:nth-child(3) { color: #FFB3A7; transform: rotate(-3deg); margin-left: 6px; }
+.logo b:nth-child(4) { color: #B8F0F8; transform: translateY(-3px) rotate(5deg); }
+.logo b:nth-child(5) { color: var(--yellow); transform: rotate(-4deg); }
+.brand:hover .logo b { transform: translateY(-4px) rotate(0); }
+.brand:focus-visible { outline-color: var(--yellow); }
+.top-nav { display: flex; gap: 22px; margin-right: auto; margin-left: 24px; }
+.top-nav a { color: #fff; font-weight: 500; font-size: 16px; opacity: .92; padding: 4px 0; border-bottom: 2px solid transparent; }
+.top-nav a:hover { opacity: 1; border-color: var(--yellow); }
+.me { background: rgba(255,255,255,.18); color: #fff; }
+@media (max-width: 760px) { .top-nav { display: none; } }
+
+/* 단추: 알약 모양 */
+.btn { border-radius: 999px; border-color: var(--line); box-shadow: 0 2px 0 var(--line); font-family: var(--font); }
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 0 var(--line); }
+.btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 1px 0 var(--line); }
+.btn.primary { --fill: var(--red); color: #fff; border-color: var(--red); box-shadow: 0 3px 0 var(--red-dk); }
+.btn.primary:hover:not(:disabled) { box-shadow: 0 5px 0 var(--red-dk); }
+.btn.teal { --fill: var(--teal); color: #fff; border-color: var(--teal); box-shadow: 0 3px 0 var(--teal-dk); }
+.btn.dark { --fill: var(--teal-dk); color: #fff; border-color: var(--teal-dk); box-shadow: none; }
+.btn.dark:hover:not(:disabled) { box-shadow: none; }
+.btn.dashed { --fill: transparent; border: 2px dashed #B9A895; box-shadow: none; }
+.btn.dashed:hover:not(:disabled) { box-shadow: none; background: var(--paper); }
+.btn.on, .btn[aria-pressed="true"]:not(.primary):not(.dark) { --fill: #FFF2CC; border-color: var(--yellow); box-shadow: 0 2px 0 #E9A800; }
+.btn.mic { --fill: var(--c); color: var(--on, #fff); box-shadow: 0 3px 0 rgba(0,0,0,.18); }
+#hear, #say { --fill: var(--teal); border-color: var(--teal); box-shadow: 0 3px 0 var(--teal-dk); }
+.chip { border-radius: 999px; background: var(--paper); }
+.kbd { background: var(--paper); }
+.star.on { color: var(--yellow); }
+
+/* 판과 카드: 크림 종이 */
+.panel, .card, .day, .step, .who-card, .game, .chart, .stat, .typeit, .trace { background: var(--paper); border-color: var(--line); }
+.panel, .card, .game { border-radius: 24px; box-shadow: 0 1px 0 var(--line), 0 10px 24px -14px rgba(90, 60, 30, .25); }
+.task { background: #FFFBF4; border-color: #E7D8C4; border-radius: 18px; }
+.task.done { border: 1px solid var(--green); background: #F2FAF1; }
+.ok-tag { background: #E3F6E0; color: var(--green-dk); }
+.hello { background: var(--cl, #FFF2CC); position: relative; overflow: hidden; border-radius: 24px; }
+.hello::after, .lesson-head::after { content: ''; position: absolute; right: -30px; top: -38px; width: 220px; height: 120px; background: #fff; opacity: .55; pointer-events: none;
+  -webkit-mask: var(--cloud) center / contain no-repeat; mask: var(--cloud) center / contain no-repeat; }
+.hello > *, .lesson-head > * { position: relative; z-index: 1; }
+.eyebrow { color: var(--teal); }
+.muted { color: var(--ink-soft); }
+
+/* 그림 틀: 둥글둥글 손으로 그린 듯 */
+.see .pic.big, .s-pic, .lh-emo, .day-ill, .wc-emo, .td-emo, .pc-art { border-radius: 46% 54% 44% 56% / 54% 44% 56% 46%; }
+.see .pic.big { background: var(--cl); box-shadow: inset 0 -6px 0 rgba(0,0,0,.04); }
+
+/* 첫 화면 (Kids Park 히어로) */
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding: 36px 34px; margin-top: 6px; border-radius: 32px; background: #FFF4E4; overflow: hidden; }
+.hero .deco { opacity: .32; }
+.hero > div { position: relative; z-index: 1; }
+.hero-txt { display: grid; gap: 16px; }
+.hero h1 { font-size: clamp(36px, 4.6vw, 60px); line-height: 1.12; color: var(--ink); }
+.hero .hl { color: var(--red); position: relative; }
+.hero .hl::after { content: ''; position: absolute; left: 0; right: 0; bottom: 4px; height: 12px; background: var(--yellow); opacity: .45; z-index: -1; border-radius: 6px; }
+.hero .lead { color: var(--ink-soft); max-width: 30em; }
+.hero-art { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.tile-day { display: grid; justify-items: center; align-content: center; gap: 2px; aspect-ratio: 4 / 3; border-radius: 24px; background: var(--cl); border: 3px solid #fff; box-shadow: 0 10px 20px -12px rgba(90,60,30,.4); transition: transform .18s cubic-bezier(.2,.9,.3,1.3); }
+.tile-day:hover { transform: translateY(-4px) rotate(-1deg); }
+.td-emo { font-family: var(--emoji); font-size: clamp(44px, 5vw, 64px); line-height: 1; border-radius: 0; }
+.tile-day b { font-family: var(--font-en); font-size: 15px; color: var(--ink-soft); }
+.tile-day small { font-size: 14px; color: var(--ink); }
+.hero-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-2deg); display: grid; justify-items: center; gap: 2px; padding: 16px 22px; min-width: 150px; background: var(--yellow); border-radius: 18px; box-shadow: 0 14px 26px -12px rgba(120, 80, 0, .55); text-align: center; }
+.hc-emo { font-family: var(--emoji); font-size: 30px; }
+.hero-card b { font-family: var(--font-en); font-size: 34px; line-height: 1; color: var(--green-dk); }
+.hero-card > span:not(.hc-emo) { font-size: 14px; color: #3A2A00; margin-bottom: 6px; }
+.values { text-align: center; display: grid; justify-items: center; gap: 8px; padding: 42px 0 10px; }
+.values h2, .programs h2 { font-size: clamp(26px, 3vw, 36px); }
+.vpills { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; margin-top: 14px; }
+.vpill { display: inline-flex; align-items: center; gap: 12px; padding: 12px 26px 12px 12px; background: var(--yellow); color: #3A2A00; font-weight: 700; font-size: 17px; border-radius: 999px; box-shadow: 0 4px 0 #E9A800; }
+.chk { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #fff; color: var(--ink); font-style: normal; font-weight: 700; }
+.programs { padding: 34px 0 10px; text-align: center; }
+.teal-t { color: var(--teal); margin-bottom: 18px; }
+.prog-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.prog-card { display: grid; gap: 6px; justify-items: center; text-align: center; transition: transform .18s cubic-bezier(.2,.9,.3,1.3); }
+.prog-card:hover { transform: translateY(-4px); }
+.pc-art { position: relative; width: 100%; aspect-ratio: 1; display: grid; place-items: center; background: var(--cl); box-shadow: 0 10px 20px -14px rgba(90,60,30,.5); }
+.pc-emo { font-family: var(--emoji); font-size: clamp(48px, 6vw, 76px); position: relative; }
+.prog-card b { font-size: 17px; }
+.prog-card small { color: var(--ink-soft); font-size: 13px; }
+@media (max-width: 900px) { .hero { grid-template-columns: minmax(0, 1fr); padding: 26px 20px; } .prog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .prog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hero-card { position: static; transform: none; grid-column: 1 / -1; } }
+
+/* 회차 카드 */
+.day { border-radius: 24px; box-shadow: 0 8px 18px -14px rgba(90,60,30,.45); }
+.day-ill { background: var(--cl); }
+.day-ill b { color: var(--ink); font-family: var(--font-en); }
+.pill { background: #F5EADB; color: var(--ink-soft); }
+.pill.ok { background: #E3F6E0; color: var(--green-dk); }
+.badge-done { width: 40px; height: 40px; top: -12px; right: -10px; background: none; box-shadow: none; color: var(--on, #fff); }
+.badge-done .burst { position: absolute; inset: 0; width: 100%; height: 100%; }
+.badge-done span { position: relative; }
+
+/* 회차 안 */
+.lesson-head { position: relative; overflow: hidden; border-radius: 28px; }
+.lesson-head .bits { left: auto; width: 180px; right: 10px; opacity: .9; }
+.lh-emo { background: #fff; }
+.step { border-radius: 999px; padding: 10px 26px 10px 10px; box-shadow: 0 4px 0 #EADBC6; }
+.step:hover { box-shadow: 0 6px 0 #EADBC6; }
+.step-no { background: var(--c); color: var(--on, #fff); font-family: var(--font-en); }
+.step-ill { width: 64px; height: 64px; display: grid; place-items: center; background: var(--cl); border-radius: 50%; font-size: 30px; letter-spacing: -8px; }
+.bar { background: #F1E5D4; }
+.bar i { background: var(--c); }
+
+/* 연습 */
+.practice { border-top: 0; position: relative; }
+.practice::before { content: ''; position: absolute; left: 24px; right: 24px; top: 0; height: 6px; border-radius: 0 0 6px 6px; background: var(--c); }
+.dot { background: var(--paper); border-color: #E3D4C0; }
+.dot.s1 { background: linear-gradient(90deg, var(--cl) 50%, var(--paper) 50%); border-color: var(--c); }
+.dot.s2 { background: var(--c); border-color: var(--c); color: var(--on, #fff); }
+.dot.cur { outline-color: var(--teal-dk); }
+.seg { background: #F3E7D7; }
+.seg button.on { background: var(--paper); }
+.en span.lit, .s-en span.lit { background: var(--yellow); }
+
+/* 결과 화면: 별 모양 배지 */
+.result-emo { position: relative; width: 120px; height: 120px; display: grid; place-items: center; }
+.result-emo .burst { position: absolute; inset: 0; width: 100%; height: 100%; }
+.result-emo span { position: relative; font-size: 56px; }
+.result .big-n b { color: var(--teal); }
+
+/* 게임 */
+.hud { background: var(--cl); }
+.hud b { color: var(--ink); }
+.mem-back { background-color: var(--c); color: var(--on, #fff); }
+.mem.got .mem-front { background: #E3F6E0; border-color: var(--green); }
+.sky { background: linear-gradient(#DDF4F8, #FFF8EE); }
+.hole { background: linear-gradient(#EAF4DC, #D5E8BE); }
+.who { background: var(--paper); }
+.who.right { border-color: var(--green); background: #E3F6E0; }
+.tile { background: var(--paper); border-color: var(--c); box-shadow: 0 3px 0 var(--c); border-radius: 14px; }
+.tile.on { background: var(--cl); }
+.pz-ans.right { border-color: var(--green); background: #E3F6E0; }
+
+/* 교사: 탭 */
+.tabs { border-color: var(--line); }
+.tab.on { color: var(--teal-dk); border-color: var(--teal); }
+
+/* 교사: 슬라이드 = 그림책 한 쪽 */
+.deck { background: #FFF8EE; border-color: var(--line); border-radius: 26px; }
+.deck::before { width: 1.2cqw; background: var(--c); }
+.deck .deco { opacity: .28; }
+.slide { z-index: 1; }
+.slide.k-cover::before, .slide.k-sec::before, .slide.k-game::before { content: ''; position: absolute; right: -4cqw; top: -5cqw; width: 34cqw; height: 18cqw; background: var(--cl);
+  -webkit-mask: var(--cloud) center / contain no-repeat; mask: var(--cloud) center / contain no-repeat; z-index: -1; }
+.slide.k-cover::after, .slide.k-sec::after, .slide.k-game::after { content: ''; position: absolute; left: 0; bottom: -6cqw; width: 40cqw; height: 18cqw; background: var(--cl); opacity: .7;
+  -webkit-mask: var(--cloud) center / contain no-repeat; mask: var(--cloud) center / contain no-repeat; z-index: -1; transform: scaleX(-1); }
+.pg { position: absolute; bottom: 1.6cqw; right: 2.2cqw; font-family: var(--font-en); font-size: 1.6cqw; color: var(--ink-soft); z-index: 2; }
+.s-pic { background: var(--cl); }
+.s-eye, .s-num { color: var(--teal); }
+.s-plan li { background: var(--yellow); color: #3A2A00; font-weight: 700; }
+.s-plan b { background: #fff; color: var(--ink); }
+.reps i { border-color: var(--teal); }
+.reps i.on { background: var(--teal); }
+.q-card { background: var(--cl); border-radius: 46% 54% 44% 56% / 54% 44% 56% 46%; }
+.q-w { border-radius: 0; background: var(--yellow); }
+.bub { background: var(--paper); border-radius: 3cqw; }
+.bub.B { background: var(--cl); }
+.prog { background: #F1E5D4; }
+.prog i { background: var(--teal); }
+
+/* 교사: 결과 (Kids Park 숫자 줄) */
+.stat { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 14px; border-radius: 20px; }
+.stat-ico { grid-row: 1 / 3; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 14px; background: #FFF2CC; font-family: var(--emoji); font-size: 24px; }
+.stat b { color: var(--green-dk); font-family: var(--font-en); font-size: 30px; }
+
+.chart { border-radius: 20px; }
+.chart .bar-fill { fill: var(--teal); }
+.chart .bar-g:hover .bar-fill, .chart .bar-g:focus .bar-fill { fill: var(--teal-dk); }
+.chart .grid { stroke: #F1E7DA; }
+.mini { background: #F1E5D4; }
+.mini i { background: var(--teal); }
+.heat td.none { background: repeating-linear-gradient(45deg, var(--paper) 0 4px, #F3E9DC 4px 7px); }
+.legend i.none { background: repeating-linear-gradient(45deg, #fff 0 3px, #E8DCCB 3px 5px); }
+.topbar .btn.dark { --fill: var(--teal-dk); border-color: var(--teal-dk); color: #fff; box-shadow: none; }
+.hello > .bits, .lesson-head > .bits, .hero > .deco { position: absolute; }

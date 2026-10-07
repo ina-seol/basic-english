@@ -10,7 +10,7 @@ var Teacher = (function () {
     view.innerHTML = tabs('#t') +
       '<section class="hello"><div><p class="eyebrow">선생님 화면</p><h1>오늘은 어떤 수업을 할까요?</h1><p class="muted">회차를 고르면 칠판 화면에 띄울 수 있는 슬라이드가 열려요. 방향키로 넘기고 <span class="kbd">F</span> 로 전체 화면.</p></div></section>' +
       '<div class="days">' + LESSONS.map(function (L) {
-        return '<a class="day" href="#t/' + L.id + '" style="--c:' + L.color + ';--cl:' + L.light + '"><span class="day-ill"><b>Day ' + L.id + '</b><span class="day-emo">' + L.icon + '</span></span>' +
+        return '<a class="day" href="#t/' + L.id + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><span class="day-ill"><b>Day ' + L.id + '</b><span class="day-emo">' + L.icon + '</span></span>' +
           '<span class="day-body"><span class="day-t">' + L.theme + ' <small>' + L.ko + '</small></span><span class="day-sub">' + L.words.slice(0, 5).map(function (w) { return esc(w.en); }).join(' · ') + ' …</span>' +
           '<span class="day-steps"><span class="pill">낱말 10</span><span class="pill">문장 4</span><span class="pill">' + GAMES[L.game].icon + ' ' + GAMES[L.game].name + '</span></span></span></a>';
       }).join('') + '</div>';
@@ -28,7 +28,7 @@ var Teacher = (function () {
   function deck(view, L) {
     var S = slidesOf(L), skey = 'fe-slide-' + L.id, idx = Math.min(store.get(skey, 0), S.length - 1), showKo = store.get('fe-ko', true), reps = {};
     view.innerHTML =
-      '<div class="deck-wrap" id="deckWrap" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+      '<div class="deck-wrap" id="deckWrap" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '">' +
       '<div class="deck-top"><a class="btn small" href="#t">← 회차 목록</a><b>Day ' + L.id + ' · ' + L.theme + ' ' + L.ko + '</b><span class="muted" id="count"></span></div>' +
       '<div class="deck" id="deck" tabindex="-1"><div class="slide" id="slide"></div><div class="game-over" id="gameOver" hidden></div></div>' +
       '<div class="deck-bar"><button class="btn" id="prev" aria-label="앞 슬라이드">◀</button><div class="prog"><i id="progBar"></i></div><button class="btn" id="next" aria-label="다음 슬라이드">▶</button>' +
@@ -75,7 +75,8 @@ var Teacher = (function () {
         '<div class="row center"><button class="btn primary big" id="demo">칠판에서 함께 해 보기</button></div><p class="s-note">학생들은 각자 기기에서 <b>Day ' + L.id + ' → ③ ' + G.name + '</b> 을 해요.</p></div>'; }
       if (s.k === 'wrap') h = '<div class="s-wrap"><h2>Today I learned</h2><div class="chips">' + L.words.map(function (w) { return '<button class="chip big" data-say="' + esc(w.en) + '">' + esc(w.en) + '</button>'; }).join('') + '</div>' +
         '<ul class="wrap-s">' + L.sentences.map(function (x) { return '<li><button class="linkish" data-say="' + esc(x.en) + '">🔊 ' + esc(x.en) + '</button></li>'; }).join('') + '</ul><p class="s-big">Good job! 👏</p></div>';
-      slide.innerHTML = h;
+      if (/cover|sec|game|wrap/.test(s.k)) h = ART.pattern(1600, 900, 3 + idx, { step: 120, scale: 1.6, skip: function (x, y) { return x > 260 && x < 1340 && y > 140 && y < 760; } }) + h;
+      slide.innerHTML = h + '<span class="pg" aria-hidden="true">' + (idx + 1) + '</span>';
       bind(s);
     }
     function say() {
@@ -149,7 +150,7 @@ var Teacher = (function () {
     Object.keys(by).forEach(function (n) { Object.keys(by[n].d).forEach(function (id) { var d = by[n].d[id]; d.pct = Math.round(((d.ws + d.wt + d.ss + d.st) / (MAXW + MAXS)) * 80 + (d.plays ? 20 : 0)); }); });
     return Object.keys(by).sort(function (a, b) { return a.localeCompare(b, 'ko'); }).map(function (n) { return by[n]; });
   }
-  var RAMP = ['#EEF2FA', '#C9D5EE', '#93AADB', '#5878BE', '#2B4789'];
+  var RAMP = ['#E6F6F9', '#B4E6EE', '#62C6D6', '#0295A9', '#036370'];
   function rampOf(p) { return p == null ? null : RAMP[p >= 90 ? 4 : p >= 70 ? 3 : p >= 45 ? 2 : p >= 20 ? 1 : 0]; }
 
   function barChart(title, sub, data, max, unit) {
@@ -189,10 +190,10 @@ var Teacher = (function () {
       var done = allD.filter(function (d) { return d.pct >= 100; }).length, plays = allD.reduce(function (a, d) { return a + d.plays; }, 0);
       var avg = Math.round(studs.reduce(function (a, s) { return a + LESSONS.reduce(function (b, L) { return b + (s.d[L.id] ? s.d[L.id].pct : 0); }, 0) / LESSONS.length; }, 0) / studs.length);
       body.innerHTML =
-        '<div class="tiles"><div class="stat"><span>학생</span><b>' + studs.length + '<small>명</small></b></div>' +
-        '<div class="stat"><span>전체 평균 진도율</span><b>' + avg + '<small>%</small></b></div>' +
-        '<div class="stat"><span>마친 회차 (100%)</span><b>' + done + '<small>개</small></b></div>' +
-        '<div class="stat"><span>게임 한 횟수</span><b>' + plays + '<small>번</small></b></div></div>' +
+        '<div class="tiles"><div class="stat"><i class="stat-ico" aria-hidden="true">🧒</i><b>' + studs.length + '<small>명</small></b><span>학생</span></div>' +
+        '<div class="stat"><i class="stat-ico" aria-hidden="true">📈</i><b>' + avg + '<small>%</small></b><span>전체 평균 진도율</span></div>' +
+        '<div class="stat"><i class="stat-ico" aria-hidden="true">🏅</i><b>' + done + '<small>개</small></b><span>마친 회차 (100%)</span></div>' +
+        '<div class="stat"><i class="stat-ico" aria-hidden="true">🎮</i><b>' + plays + '<small>번</small></b><span>게임 한 횟수</span></div></div>' +
         '<div class="charts">' +
         barChart('회차별 평균 진도율', '기록이 있는 학생 기준 · 낱말·문장 80% + 게임 20%', per.map(function (p) { return { label: 'Day ' + p.L.id, value: p.pct, note: p.L.ko + ' · ' + p.n + '명' }; }), 100, '%') +
         barChart('회차별 게임 평균 점수', '가장 높은 점수의 평균 · 100점 만점', per.map(function (p) { return { label: 'Day ' + p.L.id, value: p.game, note: GAMES[p.L.game].name + ' · ' + p.gn + '명' }; }), 100, '점') +

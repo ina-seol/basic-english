@@ -6,7 +6,7 @@ var Student = (function () {
     var used = store.get('fe-names', []);
     view.innerHTML =
       '<section class="panel name-panel">' +
-      '<div class="name-hero" aria-hidden="true">👋</div>' +
+      '<div class="result-emo" aria-hidden="true">' + ART.burst('#FFF2CC') + '<span>👋</span></div>' +
       '<h1>이름을 써 주세요</h1><p class="muted">이름만 쓰면 돼요. 공부한 기록은 선생님께 저장돼요.</p>' +
       '<form id="nameForm" class="name-form"><label class="sr" for="nm">이름</label>' +
       '<input id="nm" maxlength="12" autocomplete="off" placeholder="예: 김하늘" value="' + esc(me()) + '">' +
@@ -38,14 +38,14 @@ var Student = (function () {
       '<div class="days">' + LESSONS.map(function (L) {
         var l = Progress.lesson(n, L.id), c = counts(l, L);
         var done = c.ws + c.wt + c.ss + c.st === 2 * (c.wn + c.sn) && l.g.plays > 0;
-        return '<a class="day' + (done ? ' done' : '') + '" href="#s/' + L.id + '" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+        return '<a class="day' + (done ? ' done' : '') + '" href="#s/' + L.id + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '">' +
           '<span class="day-ill"><b>Day ' + L.id + '</b><span class="day-emo">' + L.icon + '</span></span>' +
           '<span class="day-body"><span class="day-t">' + L.theme + ' <small>' + L.ko + '</small></span>' +
           '<span class="day-steps">' +
           '<span class="pill' + (c.ws + c.wt === 2 * c.wn ? ' ok' : '') + '">낱말 ' + Math.min(c.ws, c.wt) + '/' + c.wn + '</span>' +
           '<span class="pill' + (c.ss + c.st === 2 * c.sn ? ' ok' : '') + '">문장 ' + Math.min(c.ss, c.st) + '/' + c.sn + '</span>' +
           '<span class="pill' + (l.g.plays ? ' ok' : '') + '">게임 ' + (l.g.plays ? stars(l.g.stars) : '–') + '</span></span></span>' +
-          (done ? '<span class="badge-done" aria-label="완료">✓</span>' : '') + '</a>';
+          (done ? '<span class="badge-done" aria-label="완료">' + ART.burst(L.color) + '<span>✓</span></span>' : '') + '</a>';
       }).join('') + '</div>';
     $('#chg').onclick = function () { location.hash = '#s/name'; };
   }
@@ -54,9 +54,9 @@ var Student = (function () {
     var n = me(), l = Progress.lesson(n, L.id), c = counts(l, L), G = GAMES[L.game];
     view.innerHTML =
       '<nav class="crumbs"><a class="btn small" href="#s">← 회차 목록</a></nav>' +
-      '<section class="lesson-head" style="--c:' + L.color + ';--cl:' + L.light + '"><span class="lh-emo" aria-hidden="true">' + L.icon + '</span>' +
-      '<div><p class="eyebrow">Day ' + L.id + '</p><h1>' + L.theme + ' <span class="ko">' + L.ko + '</span></h1><p>' + L.goal + '</p></div></section>' +
-      '<div class="steps" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+      '<section class="lesson-head" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><span class="lh-emo" aria-hidden="true">' + L.icon + '</span>' +
+      ART.bits([['leaf', 20, 30, -20, 1.4, '#F2A33A'], ['shroom', 70, 70, 8, 1.3], ['berry', 88, 30, 18, 1.2], ['sprig', 45, 78, -10, 1.2]]) + '<div><p class="eyebrow">Day ' + L.id + '</p><h1>' + L.theme + ' <span class="ko">' + L.ko + '</span></h1><p>' + L.goal + '</p></div></section>' +
+      '<div class="steps" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '">' +
       step(1, '낱말 익히기', '듣고 · 따라 말하고 · 따라 써요', '#s/' + L.id + '/w', [['말하기', c.ws, c.wn], ['쓰기', c.wt, c.wn]], L.words.slice(0, 4).map(function (w) { return w.pic.p ? '🙂' : w.pic; }).join('')) +
       step(2, '문장 익히기', '문장 4개를 듣고 말하고 써요', '#s/' + L.id + '/s', [['말하기', c.ss, c.sn], ['쓰기', c.st, c.sn]], '💬') +
       step(3, G.name, G.how, '#s/' + L.id + '/g', null, G.icon, l.g) +
@@ -96,7 +96,7 @@ var Student = (function () {
         }).join('') + '</span>' +
         '<span class="crumb-nav"><button class="btn small" id="prev"' + (idx === 0 ? ' disabled' : '') + ' aria-label="앞">←</button>' +
         '<button class="btn small primary" id="next">' + (idx === items.length - 1 ? '끝내기' : '다음 →') + '</button></span></nav>' +
-        '<section class="card practice ' + kind + '" style="--c:' + L.color + ';--cl:' + L.light + '">' +
+        '<section class="card practice ' + kind + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '">' +
         '<div class="see">' + ART.pic(it.pic, 'big') +
         '<div class="say-it"><p class="en' + (kind === 's' ? ' sent' : '') + '">' + (words ? it.en.split(' ').map(function (w, i) { return '<span data-w="' + i + '">' + esc(w) + '</span>'; }).join(' ') : esc(it.en)) + '</p>' +
         '<p class="ko">' + esc(it.ko) + '</p>' +
@@ -184,8 +184,8 @@ var Student = (function () {
       report();
       var tot = items.length, all = P.s.length === tot && P.t.length === tot;
       if (all) { Sound.win(); confetti(); }
-      view.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + '">' +
-        '<div class="result-emo">' + (all ? '🏆' : '💪') + '</div><h1>' + (all ? '모두 해냈어요!' : '거의 다 왔어요!') + '</h1>' +
+      view.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '">' +
+        '<div class="result-emo">' + ART.burst('#FFF2CC') + '<span>' + (all ? '🏆' : '💪') + '</span></div><h1>' + (all ? '모두 해냈어요!' : '거의 다 왔어요!') + '</h1>' +
         '<p class="big-n">말하기 <b>' + P.s.length + '</b>/' + tot + ' · 쓰기 <b>' + P.t.length + '</b>/' + tot + '</p>' +
         (all ? '' : '<p class="muted">빈 칸이 있는 번호를 눌러 마저 해요.</p>') +
         '<div class="row center">' + (all ? '' : '<button class="btn" id="again">마저 하기</button>') +
