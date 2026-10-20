@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>영어 첫걸음 QR (A4)</title>
+<style>
+@font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroM.woff) format('woff'); font-weight: 500; }
+@font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroB.woff) format('woff'); font-weight: 700; }
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+html, body { margin: 0; background: #fff; }
+body { font-family: 'Aggravo', 'Malgun Gothic', sans-serif; color: #2E2420; }
+.page { width: 210mm; height: 297mm; position: relative; overflow: hidden; background: #FFF8EE; display: flex; flex-direction: column; align-items: center; }
+.band { width: 100%; height: 30mm; background: #0295A9; display: flex; align-items: center; justify-content: center; box-shadow: 0 1.2mm 0 #036370; }
+.logo { font-weight: 700; font-size: 17mm; letter-spacing: -.3mm; line-height: 1; }
+.logo b { display: inline-block; text-shadow: 0 .8mm 0 rgba(3,60,70,.35); }
+.logo b:nth-child(1) { color: #FFBB12; transform: rotate(-6deg); }
+.logo b:nth-child(2) { color: #fff; transform: translateY(-1mm) rotate(4deg); }
+.logo b:nth-child(3) { color: #FFB3A7; transform: rotate(-3deg); margin-left: 4mm; }
+.logo b:nth-child(4) { color: #B8F0F8; transform: translateY(-1.5mm) rotate(5deg); }
+.logo b:nth-child(5) { color: #FFBB12; transform: rotate(-4deg); }
+.who { margin-top: 9mm; display: inline-flex; align-items: center; gap: 3mm; padding: 3mm 9mm; background: #FFBB12; color: #3A2A00; font-weight: 700; font-size: 9mm; border-radius: 99mm; box-shadow: 0 1.2mm 0 #E9A800; }
+.lead { margin: 5mm 0 0; font-size: 6mm; font-weight: 500; color: #75655A; }
+.card { margin-top: 6mm; padding: 8mm; background: #fff; border-radius: 9mm; box-shadow: 0 0 0 1.2mm #ECDDC9; position: relative; }
+.card svg { display: block; width: 104mm; height: 104mm; }
+.corner { position: absolute; width: 16mm; height: 16mm; border: 2.2mm solid #E74C3C; }
+.c1 { top: -4mm; left: -4mm; border-right: 0; border-bottom: 0; border-radius: 6mm 0 0 0; }
+.c2 { top: -4mm; right: -4mm; border-left: 0; border-bottom: 0; border-radius: 0 6mm 0 0; }
+.c3 { bottom: -4mm; left: -4mm; border-right: 0; border-top: 0; border-radius: 0 0 0 6mm; }
+.c4 { bottom: -4mm; right: -4mm; border-left: 0; border-top: 0; border-radius: 0 0 6mm 0; }
+.url { margin-top: 7mm; font-family: Consolas, 'Courier New', monospace; font-size: 7.4mm; font-weight: 700; color: #036370; letter-spacing: -.2mm; }
+.steps { margin: 6mm 0 0; padding: 0; list-style: none; display: flex; gap: 5mm; }
+.steps li { display: flex; align-items: center; gap: 2.5mm; padding: 2.5mm 5mm 2.5mm 2.5mm; background: #fff; border: .5mm solid #ECDDC9; border-radius: 99mm; font-size: 4.6mm; font-weight: 700; }
+.steps b { width: 7.5mm; height: 7.5mm; display: grid; place-items: center; border-radius: 50%; background: #E74C3C; color: #fff; font-size: 4mm; }
+.foot { position: absolute; left: 14mm; right: 14mm; bottom: 12mm; display: flex; align-items: center; justify-content: space-between; gap: 8mm; padding: 5mm 7mm; background: #fff; border-radius: 6mm; border: .5mm dashed #CDB79C; }
+.foot p { margin: 0; font-size: 4.2mm; line-height: 1.5; color: #75655A; }
+.foot p b { color: #2E2420; font-size: 5mm; }
+.foot .mini { font-family: Consolas, monospace; font-size: 3.6mm; color: #036370; }
+.foot svg { width: 26mm; height: 26mm; flex: none; }
+.leaf { position: absolute; width: 12mm; height: 12mm; }
+@media screen { body { background: #ddd; padding: 10mm 0; } .page { margin: 0 auto; box-shadow: 0 2mm 8mm rgba(0,0,0,.2); } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="band"><span class="logo"><b>영</b><b>어</b> <b>첫</b><b>걸</b><b>음</b></span></div>
+
+  <svg class="leaf" style="left:16mm;top:44mm;transform:rotate(-25deg)" viewBox="-15 -15 30 30"><path d="M0,-14 C9,-8 9,8 0,14 C-9,8 -9,-8 0,-14Z" fill="#F2A33A"/><path d="M0,-11 L0,14" stroke="#fff" stroke-width="1.2" opacity=".7"/></svg>
+  <svg class="leaf" style="right:18mm;top:50mm" viewBox="-15 -15 30 30"><rect x="-3.5" y="-2" width="7" height="12" rx="3" fill="#F6E3C8"/><path d="M-12,0 Q-11,-13 0,-13 Q11,-13 12,0Z" fill="#E74C3C"/><circle cx="-5" cy="-6" r="1.8" fill="#fff"/><circle cx="4" cy="-8" r="1.5" fill="#fff"/></svg>
+  <svg class="leaf" style="left:22mm;top:150mm;transform:rotate(20deg)" viewBox="-15 -15 30 30"><ellipse cx="0" cy="4" rx="7" ry="9" fill="#E3A35B"/><path d="M-9,-1 Q0,-11 9,-1 Q0,2 -9,-1Z" fill="#8A5A3B"/></svg>
+  <svg class="leaf" style="right:20mm;top:160mm;transform:rotate(30deg)" viewBox="-15 -15 30 30"><path d="M0,-14 C9,-8 9,8 0,14 C-9,8 -9,-8 0,-14Z" fill="#8DB5A0"/><path d="M0,-11 L0,14" stroke="#fff" stroke-width="1.2" opacity=".7"/></svg>
+
+  <div class="who">🎒 학생용</div>
+  <p class="lead">크롬북 카메라로 QR을 찍으면 바로 들어가요</p>
+
+  <div class="card"><span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>{{QR_STU}}</div>
+
+  <div class="url">ina-seol.github.io/basic-english/#s</div>
+
+  <ol class="steps"><li><b>1</b>QR 찍기</li><li><b>2</b>이름 쓰기</li><li><b>3</b>오늘 회차 고르기</li></ol>
+
+  <div class="foot">
+    <p><b>🧑‍🏫 선생님용</b> · 수업 슬라이드와 학습 결과<br><span class="mini">ina-seol.github.io/basic-english/#t</span></p>
+    {{QR_TEA}}
+  </div>
+</div>
+</body>
+</html>

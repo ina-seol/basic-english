@@ -1,11 +1,10 @@
 # 영어 첫걸음
 
-초등 기초 영어 5일 과정입니다.
+초등 기초 영어 20일 과정입니다. 하루에 테마 하나씩 **낱말 10개 → 문장 4개 → 바꿔 말하기 → 정리 게임** 순서로 배웁니다. 선생님 화면과 학생 화면이 한 주소에 같이 들어 있습니다.
 
 - **학생:** https://ina-seol.github.io/basic-english/#s
 - **선생님:** https://ina-seol.github.io/basic-english/#t
-
- 하루에 테마 하나씩 **낱말 10개 → 문장 4개 → 정리 게임** 순서로 배웁니다. 선생님 화면과 학생 화면이 한 주소에 같이 들어 있습니다.
+- **교실에 붙일 QR (A4):** [print/qr-a4.pdf](print/qr-a4.pdf)
 
 | 회차 | 테마 | 낱말 (예) | 바꿔 말하기 문장 틀 | 정리 게임 |
 |---|---|---|---|---|
@@ -64,9 +63,10 @@
 | `js/config.js` | 구글 시트 웹 앱 주소 |
 | `js/art.js` | 생김새 단원 사람 그림 (SVG) |
 | `js/core.js` | 저장, 기록 보내기, 읽어 주기, 음성 인식, 따라쓰기 판 |
-| `js/student.js`, `js/teacher.js`, `js/games.js`, `js/main.js` | 학생 화면, 교사 화면, 게임 5종, 화면 전환 |
+| `js/student.js`, `js/teacher.js`, `js/games.js`, `js/main.js` | 학생 화면, 교사 화면, 게임 6종, 화면 전환 |
 | `css/app.css` | 디자인 |
 | `fonts/` | SB 어그로 글꼴 |
 | `apps-script/Code.gs` | 구글 시트에 붙여 넣는 기록 저장 코드 |
+| `print/` | A4 인쇄용 QR 안내문 (`python make_qr.py` 로 다시 만들어요) |
 
 로컬에서 보려면 이 폴더에서 `python -m http.server` 를 실행하고 http://localhost:8000 을 엽니다.
