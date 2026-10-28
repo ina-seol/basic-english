@@ -4,28 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>영어 첫걸음</title>
-<meta name="description" content="초등 기초 영어 20일 과정: 가족, 동물, 계절, 색깔, 숫자, 음식, 직업 등 20가지 테마. 교사용 수업 슬라이드와 학생용 따라 말하기·따라쓰기·정리 게임">
+<meta name="description" content="초등 기초 영어 20일 과정 · BASIC Loop: 처음 진단, 맞춤 복습, 말하기·쓰기, 바로 피드백, 쌓이는 학습 기록. 교사용 수업 슬라이드와 대시보드">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Poppins:wght@400;500;600;700&family=Noto+Color+Emoji&display=swap">
-<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages.css">
+<link rel="stylesheet" href="css/games.css">
 </head>
 <body>
+<a class="skip" href="#view">본문으로 건너뛰기</a>
 <header class="topbar"><div class="top">
   <a class="brand" href="#" aria-label="영어 첫걸음 처음으로"><span class="logo" aria-hidden="true"><b>영</b><b>어</b> <b>첫</b><b>걸</b><b>음</b></span></a>
-  <nav class="top-nav" aria-label="바로가기"><a href="#s">학생</a><a href="#t">수업하기</a><a href="#t/rec">학습 결과</a></nav>
+  <nav class="top-nav" aria-label="바로가기"><a href="#s">학생</a><a href="#t">수업하기</a><a href="#t/dash">대시보드</a></nav>
   <div class="top-actions"><span id="who"></span><button class="btn small dark" id="snd" aria-pressed="true">🔊 소리 켬</button></div>
 </div></header>
-<main id="view"></main>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-<script src="js/config.js" defer></script>
-<script src="js/data.js" defer></script>
+<div class="syncbar" id="syncbar" role="status" hidden></div>
+<main id="view" tabindex="-1"></main>
+<!-- 순서가 중요해요: 설정 → 콘텐츠 → 도구 → 기록 → 계산 → 화면 -->
+<script src="config.js" defer></script>
+<script src="data/lessons.js" defer></script>
+<script src="js/util.js" defer></script>
+<script src="js/ui.js" defer></script>
+<script src="js/speech.js" defer></script>
+<script src="js/log.js" defer></script>
+<script src="js/review.js" defer></script>
+<script src="js/mastery.js" defer></script>
 <script src="js/art.js" defer></script>
-<script src="js/core.js" defer></script>
+<script src="js/trace.js" defer></script>
+<script src="js/quiz.js" defer></script>
 <script src="js/games.js" defer></script>
-<script src="js/student.js" defer></script>
-<script src="js/teacher.js" defer></script>
+<script src="js/student/login.js" defer></script>
+<script src="js/student/home.js" defer></script>
+<script src="js/student/day.js" defer></script>
+<script src="js/student/review.js" defer></script>
+<script src="js/teacher/slides.js" defer></script>
+<script src="js/teacher/data.js" defer></script>
+<script src="js/teacher/dashboard.js" defer></script>
 <script src="js/main.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 </body>
 </html>
