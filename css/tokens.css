@@ -1,0 +1,69 @@
+/* 디자인 토큰 — 색·글꼴·간격·둥글기·그림자. 다른 CSS 는 이 변수만 써요.
+   색: Kids Park(청록·빨강·노랑·초록) + 그림책(크림 종이, 따뜻한 갈색 글자) */
+@font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroL.woff) format('woff'); font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroM.woff) format('woff'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Aggravo'; src: url(../fonts/SBAggroB.woff) format('woff'); font-weight: 700; font-display: swap; }
+:root {
+  /* 색 */
+  --color-primary: #0295A9;        /* 청록: 머리띠, 듣기, 링크 */
+  --color-primary-dark: #036370;
+  --color-primary-light: #DDF4F8;
+  --color-secondary: #E74C3C;      /* 빨강: 시작·다음 같은 주요 행동 */
+  --color-secondary-dark: #B8382B;
+  --color-accent: #FFBB12;         /* 노랑: 강조 카드 */
+  --color-accent-dark: #E9A800;
+  --color-accent-light: #FFF2CC;
+  --color-success: #0A7F2E;        /* 맞음 (글자용, 대비 4.5 이상) */
+  --color-success-light: #E3F6E0;
+  --color-retry: #A9551B;          /* 다시 해 보기 (빨강 대신 주황 갈색) */
+  --color-retry-light: #FDEBD6;
+  --color-background: #FFF8EE;     /* 크림 종이 */
+  --color-surface: #FFFDF8;
+  --color-surface-2: #F6ECDF;
+  --color-line: #ECDDC9;
+  --color-line-strong: #D8C7B0;
+  --color-text-primary: #2E2420;
+  --color-text-secondary: #6E5F55;
+  --color-on-primary: #FFFFFF;
+  --color-focus: #036370;
+
+  /* 영역 색 (숙달도) — 색만으로 구분하지 않고 이름·점과 함께 써요 */
+  --area-vocab: #E74C3C; --area-listen: #0295A9; --area-speak: #F28C28; --area-write: #3FA34D; --area-sentence: #8E5BB5;
+
+  /* 글꼴 */
+  --font: "Poppins", "Aggravo", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-en: "Poppins", system-ui, sans-serif;
+  --font-learn: "Andika", "Poppins", system-ui, sans-serif;   /* 배우는 영어 글자 (한 층 a, g) */
+  --font-emoji: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  --text-xs: 13px; --text-sm: 15px; --text-md: 17px; --text-lg: 20px; --text-xl: 26px; --text-2xl: clamp(28px, 3.2vw, 40px);
+
+  /* 간격 (4px 단위) */
+  --spacing-1: 4px; --spacing-2: 8px; --spacing-3: 12px; --spacing-4: 16px; --spacing-5: 20px; --spacing-6: 24px; --spacing-8: 32px; --spacing-10: 40px;
+
+  /* 둥글기 */
+  --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 32px; --radius-pill: 999px;
+
+  /* 그림자 */
+  --shadow-card: 0 1px 0 rgba(120, 90, 60, .08), 0 10px 24px -14px rgba(90, 60, 30, .30);
+  --shadow-floating: 0 14px 30px -12px rgba(90, 60, 30, .38);
+  --shadow-press: 0 3px 0;           /* 단추 아래 두께 (색은 단추마다) */
+
+  /* 터치 */
+  --touch: 48px;                      /* 최소 터치 높이 */
+
+  /* 구름 모양 (그림책) */
+  --cloud: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cg fill='%23000'%3E%3Ccircle cx='40' cy='62' r='30'/%3E%3Ccircle cx='80' cy='44' r='38'/%3E%3Ccircle cx='126' cy='48' r='34'/%3E%3Ccircle cx='162' cy='62' r='28'/%3E%3Ccircle cx='102' cy='72' r='28'/%3E%3Ccircle cx='60' cy='76' r='22'/%3E%3Ccircle cx='146' cy='78' r='20'/%3E%3C/g%3E%3C/svg%3E");
+
+  /* 회차 색 (화면에서 style 로 덮어써요) */
+  --c: var(--color-primary); --cl: var(--color-primary-light); --on: #fff;
+
+  /* v1 이름 (games.css 가 씀) */
+  --teal: var(--color-primary); --teal-dk: var(--color-primary-dark); --red: var(--color-secondary); --red-dk: var(--color-secondary-dark);
+  --yellow: var(--color-accent); --green: #10C700; --green-dk: var(--color-success);
+  --ink: var(--color-text-primary); --ink-soft: var(--color-text-secondary); --line: var(--color-line); --bg: var(--color-background);
+  --paper: var(--color-surface); --soft: var(--color-surface-2); --good: var(--color-success); --good-lt: var(--color-success-light);
+  --bad: var(--color-retry); --bad-lt: var(--color-retry-light); --canary: var(--color-accent); --canary-lt: var(--color-accent-light);
+  --shadow: var(--shadow-card); --shadow-sm: 0 1px 0 rgba(120, 90, 60, .1); --r: var(--radius-lg); --rc: var(--radius-md);
+  --en: var(--font-learn); --emoji: var(--font-emoji);
+  color-scheme: light;
+}
