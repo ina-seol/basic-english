@@ -21,7 +21,7 @@ GitHub Pages 에서 돌아가는 정적 웹앱(빌드·서버 없음)입니다. 
 |---|---|---|
 | **B** Baseline | 지금 수준 확인 | 처음 진단 17문항 (낱말·듣기·쓰기·문장) |
 | **A** Adaptive Practice | 어려운 것 중심 반복 | Error Bank → Quick Review, My Tricky Words, 교사 지정 복습 |
-| **S** Speak & Write | 고르기만이 아닌 수행 | 따라 말하기(음성 인식), 따라 쓰기 → 기억해서 쓰기, 바꿔 말하기 |
+| **S** Speak & Write | 고르기만이 아닌 수행 | 따라 말하기(음성 인식), 따라 쓰기 1번 → 그냥 쓰기 1번, 바꿔 말하기 |
 | **I** Immediate Feedback | 바로 피드백 | Nice! / Almost! Try again / Let's look at it together (색+기호+글자) |
 | **C** Cumulative Learning Data | 쌓이는 기록과 분석 | 시도 단위 로그, 숙달도, 교사 대시보드, 연구용 CSV |
 
@@ -35,7 +35,7 @@ GitHub Pages 에서 돌아가는 정적 웹앱(빌드·서버 없음)입니다. 
 |---|---|---|
 | 1 SEE & HEAR | 그림+낱말+소리 카드 10장 → 듣고 그림 고르기 6문제 | Listening |
 | 2 SAY | 낱말 10 + 문장 4 따라 말하기 (안 되면 "말했어요") | Speaking |
-| 3 WRITE | 따라 쓰기 6개(손글씨 점선 또는 키보드) → 기억해서 쓰기 6문제 | Writing |
+| 3 WRITE | 낱말 6개를 하나씩: 따라 쓰기 1번(손글씨 점선 또는 키보드) → 그냥 쓰기 1번(그림·뜻만 보고, 한 번만 시도) | Writing |
 | 4 USE | 문장 틀 빈칸에 낱말 바꿔 넣기 → 말하기 | Sentences, Speaking |
 | 5 RETRIEVE | 정리 게임 (6종, 항목마다 기록) | Words / Listening / Writing / Sentences |
 | 6 REFLECT | 오늘 어땠는지 + 어려웠던 것 (10초) | 자기점검 |

@@ -2,7 +2,7 @@
    모든 Day 가 같은 순서예요. 단계는 언제든 다시 할 수 있고, 처음 끝낼 때 'done' 기록이 남아요. */
 var StudentDay = (function () {
   var DESC = {
-    see: '그림을 보고 소리를 들어요 → 듣고 그림 고르기', say: '낱말과 문장을 따라 말해요', write: '따라 쓰고, 기억해서 써 봐요',
+    see: '그림을 보고 소리를 들어요 → 듣고 그림 고르기', say: '낱말과 문장을 따라 말해요', write: '낱말마다 따라 쓰기 1번, 그냥 쓰기 1번',
     use: '문장 틀의 빈칸에 낱말을 바꿔 넣어 말해요', retrieve: '게임으로 기억을 꺼내요', reflect: '오늘 공부를 10초 동안 돌아봐요'
   };
   function stepOf(k) { return STEPS.filter(function (s) { return s.k === k; })[0]; }
@@ -137,16 +137,18 @@ var StudentDay = (function () {
     draw(); keys(host);
   }
 
-  /* ---------- 3 WRITE: 따라 쓰기(연습) → 기억해서 쓰기(점수) ---------- */
+  /* ---------- 3 WRITE: 낱말마다 따라 쓰기 1번 → 그냥 쓰기 1번 ----------
+     따라 쓰기(점선 손글씨 또는 보고 치기)는 연습 기록, 그냥 쓰기(그림·뜻만 보고)는 한 번만 시도해서 점수로 남겨요. */
   function write(host, L) {
     var touch = (navigator.maxTouchPoints || 0) > 0;
     var pool = L.words.map(function (w, j) { return itemInfo(itemId(L.id, 'w', j)); });
     var picks = shuffle(pool.filter(function (x) { return /^[a-z' -]{2,14}$/i.test(x.en); })).slice(0, 6);
     if (picks.length < 6) picks = picks.concat(shuffle(pool.filter(function (x) { return picks.indexOf(x) < 0; })).slice(0, 6 - picks.length));
-    var i = 0, pad = null, copied = {};
+    var i = 0, pad = null, okCount = 0;
+    function progress(phase) { return '<span class="muted">' + (i + 1) + ' / ' + picks.length + ' · ' + phase + '</span>'; }
     function copy() {
-      var it = picks[i], mode = store.get('fe-wmode', touch ? 'hand' : 'key');
-      host.innerHTML = crumbs(L, 'write', '<span class="muted">따라 쓰기 ' + (i + 1) + ' / ' + picks.length + '</span>') +
+      var it = picks[i], mode = store.get('fe-wmode', touch ? 'hand' : 'key'), done = false;
+      host.innerHTML = crumbs(L, 'write', progress('① 따라 쓰기')) +
         '<section class="card practice view-in" ' + lstyle(L) + '><div class="see">' + ART.pic(it.pic, 'big blob') + '<div class="say-it"><p class="en">' + esc(it.en) + '</p><p class="ko">' + esc(it.ko) + '</p><div class="row"><button class="btn secondary" id="hear">🔊 듣기</button></div></div></div>' +
         '<div class="tasks"><div class="task" id="tWrite"><div class="task-h"><h2><span class="emo">✏️</span> 따라 쓰기</h2>' +
         '<span class="seg" role="group" aria-label="쓰는 방법"><button class="' + (mode === 'hand' ? 'on' : '') + '" data-m="hand" aria-pressed="' + (mode === 'hand') + '">✋ 손으로</button><button class="' + (mode === 'key' ? 'on' : '') + '" data-m="key" aria-pressed="' + (mode === 'key') + '">⌨️ 키보드로</button></span></div>' +
@@ -157,10 +159,10 @@ var StudentDay = (function () {
       $$('.seg button', host).forEach(function (b) { b.onclick = function () { store.set('fe-wmode', b.dataset.m); copy(); }; });
       var t0 = Date.now();
       function ok(resp, how) {
-        if (copied[i]) return; copied[i] = 1;
+        if (done) return; done = true;
         Log.add({ day: L.id, step: 'write', act: how, item: it.id, area: 'write', ok: '', resp: resp, dur: Date.now() - t0, mode: how === 'trace' ? 'touch' : 'keyboard' });
-        Sound.good(); $('#wMsg').innerHTML = '👏 잘 썼어요!';
-        setTimeout(function () { i++; if (i < picks.length) copy(); else recall(); }, 900);
+        Sound.good(); $('#wMsg').innerHTML = '👏 잘 썼어요! 이제 보지 않고 써 봐요.';
+        setTimeout(free, 900);
       }
       if (mode === 'hand') {
         if (pad) pad.destroy();
@@ -182,11 +184,15 @@ var StudentDay = (function () {
         if (!touch) setTimeout(function () { typ.focus(); }, 50);
       }
     }
-    function recall() {
-      host.innerHTML = crumbs(L, 'write', '<span class="muted">이제 기억해서 써요</span>') + '<div id="qz"></div>';
-      Quiz.run($('#qz'), shuffle(picks).map(function (it) { return { kind: 'type', item: it, area: 'write' }; }), { step: 'write', day: L.id, title: 'Write from memory', onDone: function (r) {
-        var ok = r.filter(function (x) { return x.ok; }).length;
-        stepDone(host, L, 'write', { score: ok, total: r.length, msg: '기억해서 쓰기 <b>' + ok + '</b> / ' + r.length });
+    /* 그냥 쓰기: 같은 낱말을 그림과 뜻만 보고 한 번 (틀리면 정답을 같이 보고 다음 낱말로) */
+    function free() {
+      if (pad) { pad.destroy(); pad = null; }
+      host.innerHTML = crumbs(L, 'write', progress('② 그냥 쓰기')) + '<div id="qz"></div>';
+      Quiz.run($('#qz'), [{ kind: 'type', item: picks[i], area: 'write' }], { step: 'write', day: L.id, title: 'Write without help', tries: 1, base: i, of: picks.length, onDone: function (r) {
+        if (r[0] && r[0].ok) okCount++;
+        i++;
+        if (i < picks.length) copy();
+        else stepDone(host, L, 'write', { score: okCount, total: picks.length, msg: '그냥 쓰기 <b>' + okCount + '</b> / ' + picks.length });
       } });
     }
     Cleanup.add(function () { if (pad) pad.destroy(); });

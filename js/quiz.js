@@ -1,5 +1,5 @@
 /* 문제 풀이 공용 틀: 듣고 고르기, 그림 보고 낱말, 뜻 고르기, 써 보기, 빈칸, 순서
-   Quiz.run(host, questions, { step, day, rev, title, onDone(results) })
+   Quiz.run(host, questions, { step, day, rev, title, onDone(results), tries(기본 2, 1이면 한 번만), base·of(번호 표시) })
    question: { kind, item(itemInfo), area }
      kind: hear2pic | pic2word | word2ko | type | fill | order
 
@@ -37,7 +37,7 @@ var Quiz = (function () {
       var q = qs[k], it = q.item, tries = 0, done = false, hinted = false;
       t0 = Date.now();
       var L = it.lesson, st = 'style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"';
-      var head = '<div class="qz-top"><span class="qz-count">' + (k + 1) + ' / ' + qs.length + '</span><span class="bar" aria-hidden="true"><i style="width:' + (k / qs.length * 100) + '%"></i></span>' +
+      var head = '<div class="qz-top"><span class="qz-count">' + ((opt.base || 0) + k + 1) + ' / ' + (opt.of || qs.length) + '</span><span class="bar" aria-hidden="true"><i style="width:' + (((opt.base || 0) + k) / (opt.of || qs.length) * 100) + '%"></i></span>' +
         (opt.title ? '<span class="qz-title">' + esc(opt.title) + '</span>' : '') + '</div>';
       var body = '', opts = [];
       if (q.kind === 'hear2pic') {
@@ -81,7 +81,7 @@ var Quiz = (function () {
           Sound.good(); fb.className = 'fb ok pop-in'; fb.innerHTML = Feedback.mark(true) + Feedback.good();
           Voice.say(it.en); finish(first && !hinted);
           if (first && !hinted) setTimeout(function () { if (k < qs.length && qs[k] === q && done) nextBtn.click(); }, 1300);
-        } else if (tries === 1) {
+        } else if (tries === 1 && (opt.tries || 2) > 1) {
           Sound.bad(); fb.className = 'fb again pop-in'; fb.innerHTML = Feedback.mark(false) + Feedback.again();
         } else {
           fb.className = 'fb info pop-in'; fb.innerHTML = Feedback.together() + ' <span class="en"><b>' + esc(it.slot || it.en) + '</b></span>';
