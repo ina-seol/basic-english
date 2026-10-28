@@ -4,7 +4,7 @@ var CONFIG = {
   VERSION: '2.0.0',
 
   /* 구글 시트 기록 주소 (Apps Script 웹 앱 …/exec). 비우면 기록은 이 기기에만 남아요. */
-  SHEET_URL: 'https://script.google.com/macros/s/AKfycbzjHqLhgh2xOOca00dD6gEpnjqgPtS7sUtgaRQW03hSFwr-uf-YaBtxvqLGBArgqMQ6/exec',
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycbwxA-pO-vIwWEAF46vYh2ImD3VaELARSCcFTKvdCXBt5oP4D5sqcakKNT2Eim6rItQ3/exec',
 
   /* 학생 번호: 학년-반-번호 (예: 4-3-07). 이름은 저장하지 않아요. */
   GRADES: [3, 4, 5, 6],      // 고를 수 있는 학년

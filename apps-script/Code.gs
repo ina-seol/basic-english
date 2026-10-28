@@ -135,7 +135,8 @@ function doGet(e) {
   if (p.action === 'ping') return out_({ ok: true, v: VERSION });
   /* 학생: 내 번호의 기록과 열린 복습 (다른 기기에서 이어 하기) */
   if (p.action === 'mine2') {
-    var sid = String(p.sid || '');
+    /* 주의: Apps Script 는 'sid', 'c' 라는 주소 이름을 쓸 수 없어서(시스템 예약) 'stu' 로 받아요 */
+    var sid = String(p.stu || '');
     if (!validSid_(sid)) return out_({ ok: false, error: 'sid' });
     var sh = sheet_('events', EV_FIELDS.concat(['received'])), last = sh.getLastRow(), ev = [];
     if (last > 1) sh.getRange(2, 1, last - 1, EV_FIELDS.length).getValues().forEach(function (r) { if (r[1] === sid) ev.push(r.map(iso_)); });

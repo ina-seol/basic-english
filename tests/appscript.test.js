@@ -46,9 +46,9 @@ ok(String(sheets.events.rows[sheets.events.rows.length - 1][10]).indexOf("'=") =
 
 console.log('조회');
 ok(get({ action: 'ping' }).v === 2, 'ping 에 버전 2');
-var m = get({ action: 'mine2', sid: '4-3-07' });
+var m = get({ action: 'mine2', stu: '4-3-07' });
 ok(m.ok && m.events.length === 4 && m.events.every(function (e) { return e[1] === '4-3-07'; }), '학생은 자기 번호 기록만');
-ok(get({ action: 'mine2', sid: 'x' }).ok === false, '잘못된 번호는 거절');
+ok(get({ action: 'mine2', stu: 'x' }).ok === false, '잘못된 번호는 거절');
 ok(post({ action: 'list', key: 'wrong' }).error === 'key', '암호가 틀리면 거절');
 var l = post({ action: 'list', key: KEY });
 ok(l.ok && l.events.length === 5 && l.next === 7, '교사 전체 조회 (got ' + l.events.length + ', next ' + l.next + ')');
@@ -58,10 +58,10 @@ ok(post({ action: 'list', key: KEY, from: 4 }).events.length === 3, '이어 받�
 console.log('복습 보내기');
 var a = post({ action: 'assign', key: KEY, sids: ['4-3-07', 'bad'], items: { ids: ['tricky'], area: 'auto', title: 't' }, note: 'hi' });
 ok(a.ok && a.made.length === 1, '번호가 맞는 학생에게만');
-ok(get({ action: 'mine2', sid: '4-3-07' }).assignments.length === 1, '학생이 받음');
+ok(get({ action: 'mine2', stu: '4-3-07' }).assignments.length === 1, '학생이 받음');
 ok(post({ action: 'assign', key: 'no', sids: ['4-3-07'] }).error === 'key', '암호 없이 못 보냄');
 post({ action: 'assignCancel', key: KEY, aid: a.made[0] });
-ok(get({ action: 'mine2', sid: '4-3-07' }).assignments.length === 0, '취소하면 학생에게 안 보임');
+ok(get({ action: 'mine2', stu: '4-3-07' }).assignments.length === 0, '취소하면 학생에게 안 보임');
 
 console.log('v1 호환과 이름 → 번호');
 ok(post({ name: '김하늘', lesson: 1, part: 'words', said: 10, wrote: 10, id: 'v1a' }).ok, 'v1 요약 저장');

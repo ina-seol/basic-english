@@ -180,7 +180,7 @@ var Api = (function () {
     url: url, queue: queue, flush: flush, get: get, post: post, status: status,
     onStatus: function (f) { statusListeners.push(f); },
     /* 학생: 다른 기기에서 한 내 기록과 선생님이 보낸 복습 받기 */
-    mine: function (sid) { return get({ action: 'mine2', sid: sid }); },
+    mine: function (sid) { return get({ action: 'mine2', stu: sid }); },   // 'sid' 는 Apps Script 예약어라 못 씀
     /* 교사: 암호는 주소가 아니라 본문으로 */
     teacher: function (action, key, extra) { var b = { action: action, key: key }; for (var k in extra || {}) b[k] = extra[k]; return post(b, true); },
     ping: function () { return get({ action: 'ping' }); }
