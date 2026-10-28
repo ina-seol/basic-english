@@ -1,5 +1,10 @@
-/* 정리 게임 6종: 회차마다 하나씩. Games.start(host, lesson, onDone) */
+/* 정리 게임 6종: 회차마다 하나씩.
+   Games.start(host, lesson, onDone, ctx)
+     ctx.item({ item, ok, area, resp })  항목마다 처음 시도의 맞음/다시를 알려 줘요 (Error Bank 용)
+     ctx.next { href, label }           결과 화면의 다음 단추 */
 var Games = (function () {
+  var ctx = {};
+  function rec(L, kind, i, ok, area, resp) { if (ctx.item && i >= 0) ctx.item({ item: itemId(L.id, kind, i), ok: ok ? 1 : 0, area: area, resp: resp || '' }); }
   function head(host, L, label) {
     host.innerHTML = '<div class="game g-' + L.game + '" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><div class="hud">' + label + '</div><div class="stage"></div></div>';
     return { hud: $('.hud', host), stage: $('.stage', host), root: $('.game', host) };
@@ -16,7 +21,7 @@ var Games = (function () {
     host.innerHTML = '<section class="panel result" style="--c:' + L.color + ';--cl:' + L.light + ';--on:' + (L.on || '#fff') + '"><div class="result-emo">' + ART.burst('#FFF2CC') + '<span>' + (res.stars >= 3 ? '🏆' : res.stars === 2 ? '🎉' : '👍') + '</span></div>' +
       '<h1>' + (res.stars >= 3 ? '최고예요!' : res.stars === 2 ? '잘했어요!' : '좋아요, 한 번 더!') + '</h1>' + stars(res.stars) +
       '<p class="big-n"><b>' + res.score + '</b>점</p><p class="muted">' + esc(res.note || '') + '</p>' +
-      '<div class="row center"><button class="btn" id="again">다시 하기</button>' + (location.hash.indexOf('#t') === 0 ? '' : '<a class="btn primary" href="#s">회차 목록</a>') + '</div></section>';
+      '<div class="row center"><button class="btn" id="again">다시 하기</button>' + (ctx.next ? '<a class="btn primary" href="' + ctx.next.href + '">' + esc(ctx.next.label) + '</a>' : '') + '</div></section>';
     $('#again').onclick = again;
   }
   function later(f, ms) { var t = setTimeout(f, ms); Cleanup.add(function () { clearTimeout(t); }); return t; }
@@ -41,7 +46,7 @@ var Games = (function () {
         var a = cards[open[0]], bb = cards[open[1]], els = open.map(function (k) { return $('.mem[data-i="' + k + '"]', g.stage); });
         open = [];
         if (a.k === bb.k) {
-          found++; $('#found').textContent = found; Sound.good(); Voice.say(a.w.en);
+          found++; $('#found').textContent = found; Sound.good(); Voice.say(a.w.en); rec(L, 'w', L.words.indexOf(a.w), 1, 'vocab', 'match');
           els.forEach(function (e) { e.classList.add('got'); e.disabled = true; });
           if (found === 8) later(function () {
             var st = moves <= 13 ? 3 : moves <= 19 ? 2 : 1;
@@ -58,7 +63,8 @@ var Games = (function () {
     var g = head(host, L, '<button class="btn small" id="again2">🔊 다시 듣기</button><span class="tgt" id="tgt"></span><span>⏱ <b id="time">' + T + '</b></span><span>잡은 수 <b id="hits">0</b></span>');
     g.stage.innerHTML = '<div class="mole-grid">' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (i) { return '<div class="hole"><button class="mole" data-h="' + i + '" tabindex="-1"><span class="mole-body"></span><span class="mole-sign"></span></button></div>'; }).join('') + '</div>';
     holes = $$('.mole', g.stage);
-    function newTarget() { var t; do { t = L.words[Math.floor(Math.random() * L.words.length)]; } while (target && t === target); target = t; $('#tgt').innerHTML = '🎯 <b>' + esc(t.en) + '</b>'; Voice.say(t.en); }
+    var missed = false;
+    function newTarget() { missed = false; var t; do { t = L.words[Math.floor(Math.random() * L.words.length)]; } while (target && t === target); target = t; $('#tgt').innerHTML = '🎯 <b>' + esc(t.en) + '</b>'; Voice.say(t.en); }
     $('#again2').onclick = function () { if (target) Voice.say(target.en); };
     function pop() {
       if (over) return;
@@ -75,8 +81,8 @@ var Games = (function () {
       h.onclick = function () {
         if (!h.classList.contains('up') || over) return;
         clearTimeout(h._t);
-        if (h._w === target) { hits++; pts += 10; Sound.pop(); h.classList.add('hit'); $('#hits').textContent = hits; later(function () { h.classList.remove('up'); }, 260); later(newTarget, 300); }
-        else { miss++; pts = Math.max(0, pts - 3); Sound.bad(); h.classList.add('no'); later(function () { h.classList.remove('up'); }, 300); }
+        if (h._w === target) { if (!missed) rec(L, 'w', L.words.indexOf(target), 1, 'listen', 'hit'); hits++; pts += 10; Sound.pop(); h.classList.add('hit'); $('#hits').textContent = hits; later(function () { h.classList.remove('up'); }, 260); later(newTarget, 300); }
+        else { if (!missed) { missed = true; rec(L, 'w', L.words.indexOf(target), 0, 'listen', h._w.en); } miss++; pts = Math.max(0, pts - 3); Sound.bad(); h.classList.add('no'); later(function () { h.classList.remove('up'); }, 300); }
       };
     });
     Cleanup.add(function () { holes.forEach(function (h) { clearTimeout(h._t); }); });
@@ -95,21 +101,22 @@ var Games = (function () {
   function balloon(host, L, onDone) {
     var rounds = shuffle(L.words).slice(0, 10), r = 0, good = 0, first = true, busy = false;
     var g = head(host, L, '<span>문제 <b id="rn">1</b>/10</span><span>맞힌 수 <b id="ok">0</b></span>');
-    var cols = ['#E36D98', '#E7C33A', '#10B183', '#2B8AC9'];
+    var cols = ['#E74C3C', '#E9A800', '#3FA34D', '#0295A9'];
     function next() {
       if (r >= rounds.length) return result(host, L, { score: good * 10, stars: good >= 9 ? 3 : good >= 7 ? 2 : 1, total: 10, note: '10문제 중 ' + good + '문제를 한 번에 맞혔어요.' }, onDone, function () { Cleanup.run(); balloon(host, L, onDone); });
       var w = rounds[r], opts = shuffle([w].concat(shuffle(L.words.filter(function (x) { return x !== w; })).slice(0, 3)));
-      first = true; busy = false; $('#rn').textContent = r + 1;
+      first = true; busy = false; var logged = false; $('#rn').textContent = r + 1;
+      var once = function (ok, resp) { if (!logged) { logged = true; rec(L, 'w', L.words.indexOf(w), ok, 'vocab', resp); } };
       g.stage.innerHTML = '<div class="sky"><div class="clue">' + ART.pic(w.pic) + '<span>' + esc(w.ko) + '</span></div>' + opts.map(function (o, i) {
         return '<button class="bal" style="--bc:' + cols[i] + ';left:' + (6 + i * 23.5) + '%;animation-duration:' + (7 + Math.random() * 2.5) + 's;animation-delay:' + (i * .25) + 's" data-ok="' + (o === w ? 1 : 0) + '">' + esc(o.en) + '<i></i></button>';
       }).join('') + '</div>';
       $$('.bal', g.stage).forEach(function (b) {
         b.onclick = function () {
           if (busy) return;
-          if (b.dataset.ok === '1') { busy = true; if (first) good++; $('#ok').textContent = good; Sound.pop(); b.classList.add('popped'); Voice.say(w.en); r++; later(next, 1100); }
-          else { first = false; Sound.bad(); b.classList.add('shake'); later(function () { b.classList.remove('shake'); }, 400); }
+          if (b.dataset.ok === '1') { once(first, w.en); busy = true; if (first) good++; $('#ok').textContent = good; Sound.pop(); b.classList.add('popped'); Voice.say(w.en); r++; later(next, 1100); }
+          else { once(false, b.textContent); first = false; Sound.bad(); b.classList.add('shake'); later(function () { b.classList.remove('shake'); }, 400); }
         };
-        b.addEventListener('animationend', function (e) { if (e.animationName === 'rise' && b.dataset.ok === '1' && !busy) { first = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; } });
+        b.addEventListener('animationend', function (e) { if (e.animationName === 'rise' && b.dataset.ok === '1' && !busy) { once(false, 'missed'); first = false; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; } });
       });
     }
     next();
@@ -119,8 +126,8 @@ var Games = (function () {
   function puzzle(host, L, onDone) {
     // 회차 문장을 먼저 모두 넣고, 남은 자리는 바꿔 말하기 문장으로 (같은 문장은 한 번만)
     var seen = {}, pick = function (list) { return list.filter(function (q) { if (seen[q.en] || q.en.split(' ').length < 3) return false; seen[q.en] = 1; return true; }); };
-    var main = pick(L.sentences.map(function (x) { return { en: x.en, ko: x.ko, pic: x.pic }; }));
-    var qs = shuffle(main.concat(pick(shuffle(drillItems(L))).slice(0, 8 - main.length)));
+    var main = pick(L.sentences.map(function (x, i) { return { en: x.en, ko: x.ko, pic: x.pic, kind: 's', i: i }; }));
+    var qs = shuffle(main.concat(pick(shuffle(drillItems(L).map(function (d, i) { return { en: d.en, ko: d.ko, pic: d.pic, kind: 'dr', i: i }; }))).slice(0, 8 - main.length)));
     var r = 0, good = 0;
     var g = head(host, L, '<span>문제 <b id="rn">1</b>/' + qs.length + '</span><span>한 번에 맞힘 <b id="ok">0</b></span>');
     function next() {
@@ -138,7 +145,7 @@ var Games = (function () {
         $$('.tile.on', ans).forEach(function (b) { b.onclick = function () { placed.splice(placed.indexOf(+b.dataset.k), 1); Sound.tap(); draw(); }; });
         if (placed.length === parts.length) {
           var text = placed.map(function (k) { return tiles[k].t; }).join(' ');
-          if (text === parts.join(' ')) { if (first) good++; $('#ok').textContent = good; Sound.good(); ans.classList.add('right'); Voice.say(q.en); r++; later(next, 1500); }
+          if (text === parts.join(' ')) { rec(L, q.kind, q.i, first, 'sentence', text); if (first) good++; $('#ok').textContent = good; Sound.good(); ans.classList.add('right'); Voice.say(q.en); r++; later(next, 1500); }
           else { first = false; Sound.bad(); ans.classList.add('shake'); later(function () { ans.classList.remove('shake'); placed = placed.filter(function (k, pos) { return tiles[k].i === pos && placed.slice(0, pos).every(function (kk, pp) { return tiles[kk].i === pp; }); }); draw(); }, 600); }
         }
       }
@@ -169,7 +176,7 @@ var Games = (function () {
           var t = tiles[+b.dataset.k];
           if (t.c === letters[pos]) {
             Sound.tap(); slots[pos].textContent = t.c; slots[pos].classList.add('on'); b.disabled = true; pos++;
-            if (pos === letters.length) { if (first) good++; $('#ok').textContent = good; Sound.good(); $('.sp-ans', g.stage).classList.add('right'); Voice.say(w.en); r++; later(next, 1400); }
+            if (pos === letters.length) { rec(L, 'w', L.words.indexOf(w), first, 'write', w.en); if (first) good++; $('#ok').textContent = good; Sound.good(); $('.sp-ans', g.stage).classList.add('right'); Voice.say(w.en); r++; later(next, 1400); }
           } else { first = false; Sound.bad(); b.classList.add('shake'); later(function () { b.classList.remove('shake'); }, 400); }
         };
       });
@@ -224,7 +231,7 @@ var Games = (function () {
         b.onclick = function () {
           if (busy) return;
           var p = q.ppl[+b.dataset.i];
-          if (p === q.t) { busy = true; if (first) good++; $('#ok').textContent = good; Sound.good(); b.classList.add('right'); Voice.say("It's " + p.name + '!'); r++; later(next, 1500); }
+          if (p === q.t) { if (ctx.item) ctx.item({ item: 'd05.guess.' + r, ok: first ? 1 : 0, area: 'listen', resp: p.name }); busy = true; if (first) good++; $('#ok').textContent = good; Sound.good(); b.classList.add('right'); Voice.say("It's " + p.name + '!'); r++; later(next, 1500); }
           else { first = false; Sound.bad(); b.classList.add('wrong'); b.disabled = true; }
         };
       });
@@ -233,5 +240,5 @@ var Games = (function () {
   }
 
   var IMPL = { memory: memory, mole: mole, balloon: balloon, puzzle: puzzle, spell: spell, guess: guess };
-  return { start: function (host, L, onDone) { intro(host, L, function () { IMPL[L.game](host, L, onDone || function () { }); }); } };
+  return { start: function (host, L, onDone, c) { ctx = c || {}; intro(host, L, function () { IMPL[L.game](host, L, onDone || function () { }); }); } };
 })();

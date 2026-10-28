@@ -1,4 +1,4 @@
-/* 20회차 수업 내용. 하루에 한 테마: 낱말 10개 → 문장 4개 → 바꿔 말하기 → 정리 게임.
+/* 20회차 수업 내용 (콘텐츠만, 화면 코드는 js/ 에). 하루에 한 테마: 낱말 10개 → 문장 4개 → 바꿔 말하기 → 정리 게임.
    pic: 이모지 글자, 또는 { p: 사람 그림 이름 } (art.js 의 그림)
    drill(바꿔 말하기): en 의 {w} 자리에 낱말을 바꿔 넣어요. ko 의 {k} 는 한글 뜻,
      {k:을} {k:이} {k:이야} {k:은} {k:으로} 는 받침에 맞춰 을/를, 이/가, 이야/야, 은/는, 으로/로 를 붙여요.
@@ -509,4 +509,41 @@ function drillItems(L) {
     var ko = L.drill.ko.replace(/\{k(?::([^}]+))?\}/g, function (m, j) { return j ? josa(k, j) : k; });
     return { w: w, slot: slot, en: L.drill.en.replace('{w}', slot), ko: ko, pic: w.pic };
   });
+}
+
+/* ---------- 학습 항목 id ----------
+   d08.w.3  = Day 8 낱말 3번 (0부터)    d08.s.1 = Day 8 문장 1번    d08.dr.2 = Day 8 바꿔 말하기 2번
+   기록·Error Bank·교사 화면이 모두 이 id 로 항목을 가리켜요. */
+function itemId(day, kind, i) { return 'd' + ('0' + day).slice(-2) + '.' + kind + '.' + i; }
+function itemInfo(id) {
+  var m = /^d(\d+)\.(w|s|dr)\.(\d+)$/.exec(id || ''); if (!m) return null;
+  var L = lessonById(+m[1]); if (!L) return null;
+  var i = +m[3], base = { id: id, day: L.id, kind: m[2], i: i, lesson: L };
+  if (m[2] === 'w') { var w = L.words[i]; return w && Object.assign(base, { type: 'word', en: w.en, ko: w.ko, pic: w.pic, label: w.en }); }
+  if (m[2] === 's') { var s = L.sentences[i]; return s && Object.assign(base, { type: 'sentence', en: s.en, ko: s.ko, pic: s.pic, label: s.en }); }
+  var d = drillItems(L)[i];
+  return d && Object.assign(base, { type: 'drill', en: d.en, ko: d.ko, pic: d.pic, slot: d.slot, frame: L.drill.en, label: L.drill.en.replace('{w}', '___') + ' (' + d.slot + ')' });
+}
+
+/* ---------- 처음 진단 (Baseline) 문항 ----------
+   5~10분, 4영역. 20회차 전체에서 고르게 뽑아요. 말하기는 기기에 따라 불안정해서 넣지 않았어요. */
+function baselineItems() {
+  function pickWords(n, filter) {
+    var out = [], days = shuffle(LESSONS.map(function (L) { return L.id; }));
+    for (var k = 0; out.length < n && k < 200; k++) {
+      var L = lessonById(days[k % days.length]), i = Math.floor(Math.random() * L.words.length), w = L.words[i];
+      if (filter && !filter(w)) continue;
+      var id = itemId(L.id, 'w', i);
+      if (out.some(function (x) { return x.id === id; })) continue;
+      out.push(itemInfo(id));
+    }
+    return out;
+  }
+  var qs = [];
+  pickWords(4).forEach(function (it) { qs.push({ area: 'vocab', kind: 'pic2word', item: it }); });
+  pickWords(4).forEach(function (it) { qs.push({ area: 'listen', kind: 'hear2pic', item: it }); });
+  pickWords(3).forEach(function (it) { qs.push({ area: 'vocab', kind: 'word2ko', item: it }); });
+  pickWords(3, function (w) { return /^[a-z]{3,6}$/.test(w.en); }).forEach(function (it) { qs.push({ area: 'write', kind: 'type', item: it }); });
+  shuffle(LESSONS).slice(0, 3).forEach(function (L) { var i = Math.floor(Math.random() * drillItems(L).length); qs.push({ area: 'sentence', kind: 'fill', item: itemInfo(itemId(L.id, 'dr', i)) }); });
+  return qs;
 }
