@@ -1,4 +1,6 @@
-/* ---------- 따라쓰기 판: 영어 공책 4줄 위 점선 글자를 손가락으로 따라 써요 ---------- */
+/* ---------- 따라쓰기 판: 영어 공책 4줄 위 점선 글자를 손가락으로 따라 써요 ----------
+   opt.guide === false 면 점선 글자 없이 4줄만 (그냥 쓰기). reveal() 로 나중에 정답 점선을 보여 줘요.
+   쓴 획은 strokes() 로 꺼내 손글씨 인식에 넘겨요. */
 function TracePad(host, text, opt) {
   opt = opt || {};
   var self = this, wrap = document.createElement('div'); wrap.className = 'trace';
@@ -6,7 +8,7 @@ function TracePad(host, text, opt) {
   bg.className = 'trace-bg'; ink.className = 'trace-ink';
   ink.setAttribute('aria-label', text + ' 따라쓰기 칸');
   wrap.appendChild(bg); wrap.appendChild(ink); host.innerHTML = ''; host.appendChild(wrap);
-  var dpr = Math.min(window.devicePixelRatio || 1, 2), W, H, fs, lines, layout = [], drawing = false, last = null, strokes = 0;
+  var dpr = Math.min(window.devicePixelRatio || 1, 2), W, H, fs, lines, layout = [], drawing = false, last = null, strokes = 0, paths = [], cur = null, ptype = 'touch', guide = opt.guide !== false;
   var FONT = function (s) { return '400 ' + s + 'px Andika, "Comic Sans MS", sans-serif'; };
 
   function fit() {
@@ -39,6 +41,7 @@ function TracePad(host, text, opt) {
         c.setLineDash(i === 1 ? [6, 6] : []); c.moveTo(6, y + .5); c.lineTo(W - 6, y + .5); c.stroke();
       });
       c.setLineDash([]);
+      if (!guide) return;
       c.fillStyle = '#EEF0F4'; c.fillText(L.t, L.x, L.base);
       c.setLineDash([Math.max(3, fs * .045), Math.max(3, fs * .05)]); c.lineWidth = Math.max(1.5, fs * .018); c.strokeStyle = '#9EA4AF';
       c.strokeText(L.t, L.x, L.base); c.setLineDash([]);
@@ -48,6 +51,7 @@ function TracePad(host, text, opt) {
   function ctx() { var c = ink.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = opt.color || '#2B4789'; c.lineWidth = Math.max(7, fs * .1); return c; }
   ink.addEventListener('pointerdown', function (e) {
     e.preventDefault(); drawing = true; last = pos(e); strokes++;
+    ptype = e.pointerType || 'touch'; cur = [{ x: last.x, y: last.y, t: Date.now() }]; paths.push(cur);
     try { ink.setPointerCapture(e.pointerId); } catch (x) { }
     var c = ctx(); c.beginPath(); c.arc(last.x, last.y, c.lineWidth / 2, 0, Math.PI * 2); c.fillStyle = c.strokeStyle; c.fill();
     if (opt.onstart) opt.onstart();
@@ -55,8 +59,9 @@ function TracePad(host, text, opt) {
   ink.addEventListener('pointermove', function (e) {
     if (!drawing) return; var p = pos(e), c = ctx();
     c.beginPath(); c.moveTo(last.x, last.y); c.lineTo(p.x, p.y); c.stroke(); last = p;
+    if (cur) cur.push({ x: p.x, y: p.y, t: Date.now() });
   });
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { ink.addEventListener(ev, function () { drawing = false; }); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (ev) { ink.addEventListener(ev, function () { drawing = false; cur = null; }); });
 
   // 점선 글자를 얼마나 덮었는지(coverage)와, 선 밖으로 나간 정도(near)
   this.check = function () {
@@ -78,10 +83,46 @@ function TracePad(host, text, opt) {
     var sc = Math.round(Math.max(0, cover * 100 - Math.max(0, 0.7 - near) * 120));
     return { cover: cover, near: near, score: sc, ok: sc >= 45 && near >= .5, empty: iN < 20 };
   };
-  this.clear = function () { var c = ink.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, ink.width, ink.height); strokes = 0; };
+  this.clear = function () { var c = ink.getContext('2d'); c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, ink.width, ink.height); strokes = 0; paths = []; };
+  this.strokes = function () { return paths.filter(function (p) { return p.length; }); };
+  this.pointerType = function () { return ptype; };
+  this.isEmpty = function () { return !paths.some(function (p) { return p.length > 1; }) && paths.length < 2; };
+  this.reveal = function () { guide = true; drawBg(); };
   this.destroy = function () { window.removeEventListener('resize', onResize); };
   var rt = null; function onResize() { clearTimeout(rt); rt = setTimeout(function () { if (Math.abs(wrap.clientWidth - W) > 8) { fit(); self.clear(); } }, 200); }
   window.addEventListener('resize', onResize);
   (document.fonts && document.fonts.load ? document.fonts.load(FONT(60), text) : Promise.resolve()).then(fit, fit);
 }
 
+
+/* ---------- 손글씨 인식 (크롬북 ChromeOS 크롬의 기기 안 인식기, 인터넷 필요 없음) ----------
+   지원하지 않는 기기에서는 supported() 가 false → 정답을 보여 주고 학생이 스스로 확인해요. */
+var HWR = (function () {
+  var rec = null, checked = null;
+  function supported() {
+    if (checked !== null) return Promise.resolve(checked);
+    if (!navigator.createHandwritingRecognizer) return Promise.resolve(checked = false);
+    var q = navigator.queryHandwritingRecognizer ? navigator.queryHandwritingRecognizer({ languages: ['en'] }) : Promise.resolve({});
+    return q.then(function (r) { return (checked = !!r); }, function () { return (checked = false); });
+  }
+  function get() {
+    if (rec) return Promise.resolve(rec);
+    return navigator.createHandwritingRecognizer({ languages: ['en'] }).then(function (r) { rec = r; return r; });
+  }
+  /* strokes: [[{x,y,t}]] → 읽은 글자 후보 [text…] (최대 5개) */
+  function read(strokes, pointerType) {
+    return supported().then(function (ok) {
+      if (!ok || !strokes.length) return null;
+      return Promise.race([
+        get().then(function (r) {
+          var d = r.startDrawing({ recognitionType: 'text', inputType: pointerType === 'pen' ? 'stylus' : pointerType === 'mouse' ? 'mouse' : 'touch', alternatives: 5 });
+          var t0 = strokes[0][0].t;
+          strokes.forEach(function (p) { var s = new HandwritingStroke(); p.forEach(function (q) { s.addPoint({ x: q.x, y: q.y, t: q.t - t0 }); }); d.addStroke(s); });
+          return d.getPrediction().then(function (ps) { try { d.clear(); } catch (e) { } return (ps || []).map(function (x) { return x.text || ''; }); });
+        }),
+        new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })
+      ]);
+    }).catch(function () { return null; });
+  }
+  return { supported: supported, read: read };
+})();

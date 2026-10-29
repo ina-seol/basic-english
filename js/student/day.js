@@ -138,7 +138,7 @@ var StudentDay = (function () {
   }
 
   /* ---------- 3 WRITE: 낱말마다 따라 쓰기 1번 → 그냥 쓰기 1번 ----------
-     따라 쓰기(점선 손글씨 또는 보고 치기)는 연습 기록, 그냥 쓰기(그림·뜻만 보고)는 한 번만 시도해서 점수로 남겨요. */
+     둘 다 같은 쓰기 방법(손으로/키보드로)을 따라요. 따라 쓰기는 연습 기록, 그냥 쓰기(그림·뜻만 보고)는 한 번만 시도해서 점수로 남겨요. */
   function write(host, L) {
     var touch = (navigator.maxTouchPoints || 0) > 0;
     var pool = L.words.map(function (w, j) { return itemInfo(itemId(L.id, 'w', j)); });
@@ -185,15 +185,65 @@ var StudentDay = (function () {
       }
     }
     /* 그냥 쓰기: 같은 낱말을 그림과 뜻만 보고 한 번 (틀리면 정답을 같이 보고 다음 낱말로) */
+    function next(ok) {
+      if (ok) okCount++;
+      i++;
+      if (i < picks.length) copy();
+      else stepDone(host, L, 'write', { score: okCount, total: picks.length, msg: '그냥 쓰기 <b>' + okCount + '</b> / ' + picks.length });
+    }
     function free() {
       if (pad) { pad.destroy(); pad = null; }
-      host.innerHTML = crumbs(L, 'write', progress('② 그냥 쓰기')) + '<div id="qz"></div>';
-      Quiz.run($('#qz'), [{ kind: 'type', item: picks[i], area: 'write' }], { step: 'write', day: L.id, title: 'Write without help', tries: 1, base: i, of: picks.length, onDone: function (r) {
-        if (r[0] && r[0].ok) okCount++;
-        i++;
-        if (i < picks.length) copy();
-        else stepDone(host, L, 'write', { score: okCount, total: picks.length, msg: '그냥 쓰기 <b>' + okCount + '</b> / ' + picks.length });
-      } });
+      var mode = store.get('fe-wmode', touch ? 'hand' : 'key');
+      if (mode !== 'hand') {
+        host.innerHTML = crumbs(L, 'write', progress('② 그냥 쓰기')) + '<div id="qz"></div>';
+        Quiz.run($('#qz'), [{ kind: 'type', item: picks[i], area: 'write' }], { step: 'write', day: L.id, title: 'Write without help', tries: 1, base: i, of: picks.length, onDone: function (r) { next(r[0] && r[0].ok); } });
+        return;
+      }
+      handFree();
+    }
+    /* 손으로 그냥 쓰기: 점선 없는 4줄 공책. 크롬북 손글씨 인식으로 읽고, 인식기가 없거나 다르게 읽으면
+       정답 점선을 겹쳐 보여 주고 학생이 스스로 확인해요 (한 번만 시도). */
+    function handFree() {
+      var it = picks[i], t0 = Date.now(), finished = false;
+      host.innerHTML = crumbs(L, 'write', progress('② 그냥 쓰기')) +
+        '<section class="card qz view-in" data-item="' + it.id + '" data-kind="hand" ' + lstyle(L) + '><div class="qz-top"><span class="qz-count">' + (i + 1) + ' / ' + picks.length + '</span><span class="bar" aria-hidden="true"><i style="width:' + (i / picks.length * 100) + '%"></i></span><span class="qz-title">Write without help</span></div>' +
+        '<p class="qz-prompt">그림을 보고 영어로 써요 · 보지 않고 손으로</p>' +
+        '<div class="qz-ask"><span class="qz-pic blob small">' + ART.pic(it.pic) + '</span><p class="qz-ko">' + esc(it.ko) + '</p><p class="qz-slots en" aria-label="' + it.en.replace(/ /g, '').length + '글자">' + it.en.split('').map(function (c) { return c === ' ' ? '<i class="sp"></i>' : '<i></i>'; }).join('') + '</p></div>' +
+        '<div id="pad"></div><div class="row center" id="hBtns"><button class="btn" id="erase">지우기</button><button class="btn primary" id="hDone">다 썼어요</button></div>' +
+        '<div class="fb info" id="qFb" aria-live="polite">천천히 또박또박 써요.</div><div class="row center" id="hCheck" hidden></div>' +
+        '<div class="row center"><button class="btn primary" id="qNext" hidden>다음 →</button></div></section>';
+      pad = new TracePad($('#pad'), it.en, { guide: false, max: Math.min(110, Math.round(innerHeight * .14)), color: '#036370' });
+      var fb = $('#qFb');
+      $('#erase').onclick = function () { pad.clear(); fb.className = 'fb info'; fb.textContent = '천천히 또박또박 써요.'; };
+      function log(ok, mode, resp, extra) {
+        if (finished) return; finished = true;
+        Log.add({ day: L.id, step: 'write', act: 'hand', item: it.id, area: 'write', ok: ok ? 1 : 0, resp: resp || '', dur: Date.now() - t0, mode: mode, x: JSON.stringify(extra || {}) });
+        $('#hBtns').hidden = true; $('#hCheck').hidden = true;
+        var nb = $('#qNext'); nb.hidden = false; nb.focus(); nb.onclick = function () { next(ok); };
+      }
+      function good(mode, resp, extra) { Sound.good(); fb.className = 'fb ok pop-in'; fb.innerHTML = Feedback.mark(true) + Feedback.good(); Voice.say(it.en); log(true, mode, resp, extra); }
+      /* 정답 점선을 겹쳐 보여 주고 스스로 확인 */
+      function selfCheck(heard) {
+        pad.reveal(); Voice.say(it.en);
+        fb.className = 'fb info pop-in';
+        fb.innerHTML = (heard != null ? '<span class="fb-ko">내 글씨를 “' + esc(heard || '?') + '” 로 읽었어요.</span> ' : '') + '<b>정답 <span class="en">' + esc(it.en) + '</span></b> — 내가 쓴 것과 같나요?';
+        var box = $('#hCheck'); box.hidden = false; $('#hBtns').hidden = true;
+        box.innerHTML = '<button class="btn secondary" id="same">✓ 같아요</button><button class="btn" id="diff">↻ 달라요</button>';
+        var ex = { check: 'self', hwr: heard == null ? 'none' : heard };
+        $('#same').onclick = function () { good('self', heard || '', ex); };
+        $('#diff').onclick = function () { fb.className = 'fb info pop-in'; fb.innerHTML = Feedback.together() + ' <span class="en"><b>' + esc(it.en) + '</b></span>'; log(false, 'self', heard || '', ex); };
+      }
+      $('#hDone').onclick = function () {
+        if (pad.isEmpty()) { fb.className = 'fb info'; fb.textContent = '먼저 써 봐요.'; return; }
+        var btn = this; btn.disabled = true; fb.className = 'fb info'; fb.textContent = '읽고 있어요…';
+        HWR.read(pad.strokes(), pad.pointerType()).then(function (alts) {
+          btn.disabled = false;
+          if (!alts) return selfCheck(null);                       // 인식기 없음 → 스스로 확인
+          var target = normAnswer(it.en).replace(/ /g, ''), hit = alts.some(function (a) { return normAnswer(a).replace(/ /g, '') === target; });
+          if (hit) good('hwr', alts[0], { check: 'hwr', alts: alts.slice(0, 3) });
+          else selfCheck(alts[0] || '');                           // 다르게 읽음 → 아이 글씨를 잘못 읽었을 수도 있어서 스스로 확인
+        });
+      };
     }
     Cleanup.add(function () { if (pad) pad.destroy(); });
     copy();
