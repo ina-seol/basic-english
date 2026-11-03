@@ -88,6 +88,7 @@ function TracePad(host, text, opt) {
   this.pointerType = function () { return ptype; };
   this.isEmpty = function () { return !paths.some(function (p) { return p.length > 1; }) && paths.length < 2; };
   this.reveal = function () { guide = true; drawBg(); };
+  this.size = function () { return { w: W, h: H }; };
   this.destroy = function () { window.removeEventListener('resize', onResize); };
   var rt = null; function onResize() { clearTimeout(rt); rt = setTimeout(function () { if (Math.abs(wrap.clientWidth - W) > 8) { fit(); self.clear(); } }, 200); }
   window.addEventListener('resize', onResize);
@@ -95,34 +96,52 @@ function TracePad(host, text, opt) {
 }
 
 
-/* ---------- 손글씨 인식 (크롬북 ChromeOS 크롬의 기기 안 인식기, 인터넷 필요 없음) ----------
-   지원하지 않는 기기에서는 supported() 가 false → 정답을 보여 주고 학생이 스스로 확인해요. */
+/* ---------- 손글씨 인식 ----------
+   1) 크롬북(ChromeOS) 크롬의 기기 안 인식기 (인터넷 필요 없음)
+   2) 없으면 Google 손글씨 입력 서비스 (inputtools.google.com) — 획 좌표만 보내요. 이름·번호는 보내지 않아요.
+   3) 둘 다 안 되면(인터넷 끊김 등) null → 점수 없이 기록
+   read() 결과: { source: 'device' | 'cloud', alts: [글자 후보…] } 또는 null */
 var HWR = (function () {
   var rec = null, checked = null;
-  function supported() {
+  var CLOUD = 'https://inputtools.google.com/request?ime=handwriting&app=mobilesearch&cs=1&oe=UTF-8';
+  function deviceOk() {
     if (checked !== null) return Promise.resolve(checked);
     if (!navigator.createHandwritingRecognizer) return Promise.resolve(checked = false);
     var q = navigator.queryHandwritingRecognizer ? navigator.queryHandwritingRecognizer({ languages: ['en'] }) : Promise.resolve({});
     return q.then(function (r) { return (checked = !!r); }, function () { return (checked = false); });
   }
-  function get() {
-    if (rec) return Promise.resolve(rec);
-    return navigator.createHandwritingRecognizer({ languages: ['en'] }).then(function (r) { rec = r; return r; });
+  function timeout(ms) { return new Promise(function (res) { setTimeout(function () { res(null); }, ms); }); }
+  function device(strokes, pointerType) {
+    return (rec ? Promise.resolve(rec) : navigator.createHandwritingRecognizer({ languages: ['en'] }).then(function (r) { return (rec = r); })).then(function (r) {
+      var d = r.startDrawing({ recognitionType: 'text', inputType: pointerType === 'pen' ? 'stylus' : pointerType === 'mouse' ? 'mouse' : 'touch', alternatives: 5 });
+      var t0 = strokes[0][0].t;
+      strokes.forEach(function (p) { var s = new HandwritingStroke(); p.forEach(function (q) { s.addPoint({ x: q.x, y: q.y, t: q.t - t0 }); }); d.addStroke(s); });
+      return d.getPrediction().then(function (ps) { try { d.clear(); } catch (e) { } var a = (ps || []).map(function (x) { return x.text || ''; }); return a.length ? { source: 'device', alts: a } : null; });
+    });
   }
-  /* strokes: [[{x,y,t}]] → 읽은 글자 후보 [text…] (최대 5개) */
-  function read(strokes, pointerType) {
-    return supported().then(function (ok) {
-      if (!ok || !strokes.length) return null;
-      return Promise.race([
-        get().then(function (r) {
-          var d = r.startDrawing({ recognitionType: 'text', inputType: pointerType === 'pen' ? 'stylus' : pointerType === 'mouse' ? 'mouse' : 'touch', alternatives: 5 });
-          var t0 = strokes[0][0].t;
-          strokes.forEach(function (p) { var s = new HandwritingStroke(); p.forEach(function (q) { s.addPoint({ x: q.x, y: q.y, t: q.t - t0 }); }); d.addStroke(s); });
-          return d.getPrediction().then(function (ps) { try { d.clear(); } catch (e) { } return (ps || []).map(function (x) { return x.text || ''; }); });
-        }),
-        new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })
-      ]);
-    }).catch(function () { return null; });
+  function cloud(strokes, w, h) {
+    var t0 = strokes[0][0].t;
+    var ink = strokes.map(function (p) { return [p.map(function (q) { return Math.round(q.x); }), p.map(function (q) { return Math.round(q.y); }), p.map(function (q) { return q.t - t0; })]; });
+    var body = { options: 'enable_pre_space', requests: [{ writing_guide: { writing_area_width: Math.round(w || 600), writing_area_height: Math.round(h || 150) }, ink: ink, language: 'en', max_num_results: 10, max_completions: 0 }] };
+    return fetch(CLOUD, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { var a = d && d[0] === 'SUCCESS' && d[1] && d[1][0] && d[1][0][1]; return a && a.length ? { source: 'cloud', alts: a } : null; });
   }
-  return { supported: supported, read: read };
+  function read(strokes, pointerType, w, h) {
+    if (!strokes.length) return Promise.resolve(null);
+    return deviceOk().then(function (ok) {
+      var first = ok ? Promise.race([device(strokes, pointerType), timeout(5000)]).catch(function () { return null; }) : Promise.resolve(null);
+      return first.then(function (r) {
+        if (r) return r;
+        if (!navigator.onLine) return null;
+        return Promise.race([cloud(strokes, w, h), timeout(6000)]).catch(function () { return null; });
+      });
+    });
+  }
+  /* 맞는지: 후보 중 하나라도 정답과 같으면 (대소문자·띄어쓰기·문장부호 무시) */
+  function matches(alts, answer) {
+    var t = normAnswer(answer).replace(/ /g, '');
+    return (alts || []).some(function (a) { return normAnswer(a).replace(/ /g, '') === t; });
+  }
+  return { read: read, matches: matches, deviceOk: deviceOk };
 })();
